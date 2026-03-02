@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ConstantsByGame>
+	<Splat>
+		<Constant name="FLY_SPEED" value="300.0f" />
+		<Constant name="SPAWN_INTERVAL" value="1.0f" />
+		<Constant name="SWATTER_COOLDOWN" value="2.0f" />
+	</Splat>
+
+	<Tanks>
+		<Constant name="ENEMY_SPEED" value="50.0f" />
+		<Constant name="HORIZONTAL_SPEED" value="50.0f" />
+		<Constant name="STATE_DURATION" value="2.0f" />
+		<Constant name="PAUSE_DURATION" value="1.0f" />
+		<Constant name="BULLET_SPEED" value="500.0f" />
+		<Constant name="ENEMY_SPAWN_INTERVAL" value="2.0f" />
+		<Constant name="PLAYER_SPEED" value="150.0f" />
+		<Constant name="TOTAL_WAVES_TANKS" value="3" />
+	</Tanks>
+
+	<SpaceInvaders>
+		<Constant name="ENEMY_MOVE_SPEED_SPACEINVADERS" value="25.0f" />
+		<Constant name="ENEMY_MOVE_COOLDOWN_SPACEINVADERS" value="1.0f" />
+		<Constant name="ENEMY_DROP_AMOUNT_SPACEINVADERS" value="20.0f" />
+		<Constant name="PLAYER_SPEED_SPACEINVADERS" value="200.0f" />
+		<Constant name="ENEMY_ROWS_SPACEINVADERS" value="4" />
+		<Constant name="ENEMY_COLS_SPACEINVADERS" value="8" />
+	</SpaceInvaders>
+</ConstantsByGame>
