@@ -11,7 +11,7 @@ class TextRenderer : public Renderer
 {
 protected:
 	std::string text;
-	SDL_Texture* textTexture;
+	SDL_Texture* textTexture = nullptr;
 	bool autoSize = true;
 
 public:

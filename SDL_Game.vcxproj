@@ -19,31 +19,24 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="source\Fly.cpp" />
     <ClCompile Include="source\Game.cpp" />
     <ClCompile Include="source\ImageRenderer.cpp" />
     <ClCompile Include="source\main.cpp" />
     <ClCompile Include="source\RenderManager.cpp" />
     <ClCompile Include="source\Ship.cpp" />
-    <ClCompile Include="source\Swatter.cpp" />
-    <ClCompile Include="source\TankPlayer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="resources\background1.png" />
     <Image Include="resources\background2.png" />
     <Image Include="resources\background3.png" />
     <Image Include="resources\bullet.png" />
-    <Image Include="resources\cannon.png" />
     <Image Include="resources\enemy.png" />
-    <Image Include="resources\enemy2.png" />
-    <Image Include="resources\enemy3.png" />
     <Image Include="resources\enemySplat1.png" />
     <Image Include="resources\enemySplat2.png" />
     <Image Include="resources\enemySplat3.png" />
     <Image Include="resources\enemyTank1.png" />
     <Image Include="resources\enemyTank2.png" />
     <Image Include="resources\enemyTank3.png" />
-    <Image Include="resources\enemyviejo.png" />
     <Image Include="resources\player.png" />
     <Image Include="resources\PlayerSpace.png" />
     <Image Include="resources\PlayerSplat.png" />
@@ -51,17 +44,15 @@
     <Image Include="resources\spashscreen.png" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="source\AABB.h" />
     <ClInclude Include="source\BulletAlien.h" />
-    <ClInclude Include="source\EnemyCannon.h" />
     <ClInclude Include="source\Button.h" />
     <ClInclude Include="source\GameOverScene.h" />
     <ClInclude Include="source\Alien.h" />
     <ClInclude Include="source\AnimatedImageRenderer.h" />
     <ClInclude Include="source\AudioManager.h" />
     <ClInclude Include="source\BulletShip.h" />
-    <ClInclude Include="source\BulletTank.h" />
     <ClInclude Include="source\ConstantsManager.h" />
-    <ClInclude Include="source\Fly.h" />
     <ClInclude Include="source\Game.h" />
     <ClInclude Include="source\GameConstants.h" />
     <ClInclude Include="source\ImageObject.h" />
@@ -69,7 +60,6 @@
     <ClInclude Include="source\InputManager.h" />
     <ClInclude Include="source\MainMenu.h" />
     <ClInclude Include="source\Object.h" />
-    <ClInclude Include="source\RankingMenu.h" />
     <ClInclude Include="source\Renderer.h" />
     <ClInclude Include="source\RenderManager.h" />
     <ClInclude Include="source\Rigidbody.h" />
@@ -78,20 +68,13 @@
     <ClInclude Include="source\Ship.h" />
     <ClInclude Include="source\SpaceInvaders.h" />
     <ClInclude Include="source\Spawner.h" />
-    <ClInclude Include="source\SplashScreen.h" />
-    <ClInclude Include="source\Splat.h" />
     <ClInclude Include="source\SpriteMenu.h" />
-    <ClInclude Include="source\Swatter.h" />
-    <ClInclude Include="source\TankEnemy.h" />
-    <ClInclude Include="source\TankPlayer.h" />
-    <ClInclude Include="source\Tanks.h" />
     <ClInclude Include="source\TextObject.h" />
     <ClInclude Include="source\TextRenderer.h" />
     <ClInclude Include="source\TimeManager.h" />
     <ClInclude Include="source\Transform.h" />
     <ClInclude Include="source\Vector2.h" />
     <ClInclude Include="source\YouWonScene.h" />
-    <ClInclude Include="source\TankCannon.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="resources\highScore.bin" />

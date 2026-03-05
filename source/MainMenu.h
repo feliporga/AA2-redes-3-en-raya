@@ -44,45 +44,19 @@ public:
         SPAWN.SpawnObject(textMenu);
 
         //Games
-        buttonSpaceInvaders = new Button(Vector2(windowWidth / 2 - 475.0f, windowHeight / 2 - 100), Vector2(250, 50), SDL_Color{ 255, 0, 255, 255 }, "SPACE INVADERS", Button::ActionType::ChangeScene, "Space Invaders");
-        buttonTanks = new Button(Vector2(windowWidth / 2 - 125.0f, windowHeight / 2 - 100), Vector2(250, 50), SDL_Color{ 255, 0, 255, 255 }, "TANKS", Button::ActionType::ChangeScene, "Tanks");
-        buttonSplat = new Button(Vector2(windowWidth / 2 + 225.0f, windowHeight / 2 - 100), Vector2(250, 50), SDL_Color{ 255, 0, 255, 255 }, "SPLAT", Button::ActionType::ChangeScene, "Splat");
+        buttonSpaceInvaders = new Button(Vector2(windowWidth / 2 - 125.0f, windowHeight / 2 - 100), Vector2(250, 50), SDL_Color{ 255, 0, 255, 255 }, "SPACE INVADERS", Button::ActionType::ChangeScene, "Space Invaders");
         
-        //others
-        buttonSprite = new Button(Vector2(windowWidth / 2 - 125.0f, windowHeight / 2 - 10), Vector2(250, 50), SDL_Color{ 255, 0, 255, 255 }, "SPRITE SELECTOR", Button::ActionType::ChangeScene, "SpriteMenu");
-        buttonRanking = new Button(Vector2(windowWidth / 2 - 125.0f, windowHeight / 2 + 80), Vector2(250, 50), SDL_Color{ 255, 0, 255, 255 }, "RANKING SELECTOR", Button::ActionType::ChangeScene, "RankingMenu");
-
         buttonAudio = new Button(Vector2(windowWidth / 2 - 125.0f, windowHeight / 2 + 170), Vector2(250, 50), SDL_Color{ 255, 0, 255, 255 }, "Toggle Audio", Button::ActionType::ToggleAudio);
         buttonExit = new Button(Vector2(windowWidth / 2 - 125.0f, windowHeight / 2 + 260), Vector2(250, 50), SDL_Color{ 255, 0, 255, 255 }, "Exit Game", Button::ActionType::ExitGame);
 
 
         SPAWN.SpawnObject(buttonSpaceInvaders);
-        SPAWN.SpawnObject(buttonTanks);
-        SPAWN.SpawnObject(buttonSplat);
-        SPAWN.SpawnObject(buttonSprite);
-        SPAWN.SpawnObject(buttonRanking);
         SPAWN.SpawnObject(buttonAudio);
         SPAWN.SpawnObject(buttonExit);
 
-        buttonSpaceInvadersText = new TextObject("SPACE INVADERS");
-        buttonSpaceInvadersText->GetTransform()->position = Vector2(windowWidth / 2 - 405.0f, windowHeight / 2 - 40);
+        buttonSpaceInvadersText = new TextObject("TIC TAC TOE");
+        buttonSpaceInvadersText->GetTransform()->position = Vector2(windowWidth / 2 - 30.0f, windowHeight / 2 - 40);
         SPAWN.SpawnObject(buttonSpaceInvadersText);
-
-        buttonTanksText = new TextObject("TANKS");
-        buttonTanksText->GetTransform()->position = Vector2(windowWidth / 2 + 5.0f, windowHeight / 2 - 40);
-        SPAWN.SpawnObject(buttonTanksText);
-
-        buttonSplatText = new TextObject("SPLAT");
-        buttonSplatText->GetTransform()->position = Vector2(windowWidth / 2 + 360.0f, windowHeight / 2 - 40);
-        SPAWN.SpawnObject(buttonSplatText);
-        
-        buttonSpriteText = new TextObject("SPRITE SELECTOR");
-        buttonSpriteText->GetTransform()->position = Vector2(windowWidth / 2 - 60.0f, windowHeight / 2 + 50);
-        SPAWN.SpawnObject(buttonSpriteText);
-
-        buttonRankingText = new TextObject("CHECK RANKING");
-        buttonRankingText->GetTransform()->position = Vector2(windowWidth / 2 - 50.0f, windowHeight / 2 + 140);
-        SPAWN.SpawnObject(buttonRankingText);
 
         buttonAudioText = new TextObject("EN/DISABLE AUDIO");
         buttonAudioText->GetTransform()->position = Vector2(windowWidth / 2 - 65.0f, windowHeight / 2 + 230);

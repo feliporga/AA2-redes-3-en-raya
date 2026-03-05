@@ -15,10 +15,7 @@ public:
 	}
 
 	~TextObject() {
-		if (tr != nullptr) {
-			delete tr;
-			tr = nullptr;
-		}
+		tr = nullptr;
 	}
 
 	void SetText(std::string text) {

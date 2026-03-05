@@ -4,10 +4,6 @@
 #include "InputManager.h"
 #include "SceneManager.h"
 #include "AudioManager.h"
-#include "TankEnemy.h"
-#include "TankPlayer.h"
-#include "Swatter.h"
-#include "Fly.h"
 #include "Alien.h"
 #include <string>
 
@@ -83,60 +79,6 @@ public:
                 }
                 break;
             }
-            case ActionType::SpritesChange:
-                switch(std::stoi(text)) {
-                case 11:
-                    RM->SetBackground("resources/background1.png");
-                    break;
-                case 12:
-                    RM->SetBackground("resources/background2.png");
-                    break;
-                case 13:
-                    RM->SetBackground("resources/background3.png");
-                    break;
-                case 21:
-                    TankEnemy::SetDefaultSpriteTank("resources/enemyTank1.png");
-                    Fly::SetDefaultSpriteFly("resources/enemySplat1.png");
-                    Alien::SetDefaultSpriteAlien("resources/enemy.png");
-                    break;
-                case 22:
-                    TankEnemy::SetDefaultSpriteTank("resources/enemyTank2.png");
-                    Fly::SetDefaultSpriteFly("resources/enemySplat2.png");
-                    Alien::SetDefaultSpriteAlien("resources/enemy2.png");
-                    break;
-                case 23:
-                    TankEnemy::SetDefaultSpriteTank("resources/enemyTank3.png");
-                    Fly::SetDefaultSpriteFly("resources/enemySplat3.png");
-                    Alien::SetDefaultSpriteAlien("resources/enemy3.png");
-                    break;
-                case 31:
-                    TankPlayer::SetShootSFXTank("squirt");
-                    TankEnemy::SetShootSFXEnemyDie("explosionBug");
-                    Ship::SetShootSFXShip("squirt");
-                    Alien::SetShootSFXAlienDie("explosionBug");
-                    Swatter::SetShootSFXSwatter("squirt");
-                    Swatter::SetShootSFXFlyDie("explosionBug");
-                    break;
-                case 32:
-                    TankPlayer::SetShootSFXTank("bulletshot");
-                    TankEnemy::SetShootSFXEnemyDie("explosionShoot");
-                    Ship::SetShootSFXShip("bulletshot");
-                    Alien::SetShootSFXAlienDie("explosionShoot");
-                    Swatter::SetShootSFXSwatter("bulletshot");
-                    Swatter::SetShootSFXFlyDie("explosionShoot");
-                    break;
-                case 33:
-                    TankPlayer::SetShootSFXTank("laser");
-                    TankEnemy::SetShootSFXEnemyDie("explosionLaser");
-                    Ship::SetShootSFXShip("laser");
-                    Alien::SetShootSFXAlienDie("explosionLaser");
-                    Swatter::SetShootSFXSwatter("laser");
-                    Swatter::SetShootSFXFlyDie("explosionLaser");
-                    break;
-                }
-                
-                //cambio sprite
-                break;
             case ActionType::ExitGame:
                 SceneManager::Instance().ExitGame();
                 break;
