@@ -15,6 +15,8 @@ void Game::Init() {
     RM->LoadTexture("resources/background1.png");
 
     RM->LoadTexture("resources/enemy.png");
+    RM->LoadTexture("resources/PlayerSpace.png");
+    RM->LoadTexture("resources/bullet.png");
 
     AM.LoadClip("laser");
     AM.LoadClip("squirt");
