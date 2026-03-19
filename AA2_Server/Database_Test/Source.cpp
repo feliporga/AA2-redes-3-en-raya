@@ -11,7 +11,7 @@
 #define SERVER "127.0.0.1:3306"
 #define USERNAME "root"
 #define PASSWORD "enti"
-#define DATABASE "videogame"
+#define DATABASE "tictactoe_db"
 void ConnectDatabase(sql::Driver*& driver, sql::Connection*& con) {
 	try {
 		driver = get_driver_instance();
