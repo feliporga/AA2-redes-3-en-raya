@@ -416,3 +416,7 @@ FodyWeavers.xsd
 *.msix
 *.msm
 *.msp
+
+# Excepción para las dependencias del juego
+!AA2_Juego/dependencies/bin/
+!AA2_Juego/dependencies/bin/*.dll
