@@ -35,7 +35,7 @@ public:
         buttonMenu = new Button(
             Vector2(windowWidth / 2 - 125.0f, windowHeight / 2 - 270),
             Vector2(250, 50),
-            SDL_Color{ 255, 0, 255, 255 },
+            sf::Color(255, 0, 255, 255),
             "GO TO MENU",
             Button::ActionType::ChangeScene,
             "MainMenu"

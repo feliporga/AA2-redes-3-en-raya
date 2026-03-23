@@ -1,50 +1,46 @@
 #include "ImageRenderer.h"
 #include "RenderManager.h"
-#include "TimeManager.h"
 
 ImageRenderer::ImageRenderer(Transform* transform, std::string resourcePath, Vector2 sourceOffset, Vector2 sourceSize)
-	: Renderer(transform, resourcePath) 
+    : Renderer(transform, resourcePath)
 {
-	RM->GetTexture(resourcePath);
+    RM->LoadTexture(resourcePath);
+    sf::Texture* tex = RM->GetTexture(resourcePath);
 
-	sourceRect = SDL_Rect{ //(int) porq hacemos referencia a pixeles
-		(int)sourceOffset.x,
-		(int)sourceOffset.y,
-		(int)sourceSize.x,
-		(int)sourceSize.y
-	};
+    // SFML 3.0: Creamos el sprite pasándole la textura directamente en su nacimiento
+    if (tex) {
+        sprite = new sf::Sprite(*tex);
+    }
 
-	destRect = SDL_Rect{
-		(int)transform->position.x,
-		(int)transform->position.y,
-		(int)transform->scale.x,
-		(int)transform->scale.y,
-	};	
+    sourceRect = sf::IntRect({ (int)sourceOffset.x, (int)sourceOffset.y }, { (int)sourceSize.x, (int)sourceSize.y });
+
+    if (sprite) {
+        sprite->setTextureRect(sourceRect);
+    }
+}
+
+ImageRenderer::~ImageRenderer()
+{
+    if (sprite) {
+        delete sprite;
+        sprite = nullptr;
+    }
 }
 
 void ImageRenderer::Update()
 {
-	
-	Vector2 offset = (Vector2(-transform->size.x, -transform->size.y) / 2.0f) * transform->scale;
+    if (!sprite) return; // Si no hay sprite, no actualizamos
 
-	destRect.x = transform->position.x + offset.x;
-	destRect.y = transform->position.y + offset.y;
+    Vector2 offset = (Vector2(-transform->size.x, -transform->size.y) / 2.0f) * transform->scale;
 
-	destRect.w = transform->size.x * transform->scale.x;
-	destRect.h = transform->size.y * transform->scale.y;
+    sprite->setPosition({ transform->position.x + offset.x, transform->position.y + offset.y });
+    sprite->setScale({ transform->scale.x, transform->scale.y });
+    sprite->setRotation(sf::degrees(transform->rotation));
 }
 
 void ImageRenderer::Render()
 {
-	//SDL_RenderCopy(RM->GetRenderer(), RM->GetTexture(targetPath), &sourceRect, &destRect);
-
-
-	SDL_RenderCopyEx(
-		RM->GetRenderer(),
-		RM->GetTexture(targetPath),
-		&sourceRect,
-		&destRect,
-		transform->rotation,
-		NULL,
-		SDL_FLIP_NONE);
+    if (sprite && RM->GetWindow()) {
+        RM->GetWindow()->draw(*sprite); // Le pasamos el contenido del puntero (*)
+    }
 }

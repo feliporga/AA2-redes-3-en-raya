@@ -21,17 +21,17 @@ public:
         : ImageRenderer(transform, resourcePath, sourceOffset, sourceSize),
         frameWidth(frameWidth), frameHeight(frameHeight), fps(fps), looping(looping)
     {
-        frameTime = 1.0f / fps; // Tiempo por frame en segundos
+        frameTime = 1.0f / fps;
         currentFrameTime = 0.0f;
-        totalFrameCount = sourceSize.x / frameWidth;
+        totalFrameCount = (int)sourceSize.x / frameWidth;
         currentFrameIndex = 0;
 
-        sourceRect = {
-            (int)sourceOffset.x,
-            (int)sourceOffset.y,
-            frameWidth,
-            frameHeight
-        };
+        sourceRect = sf::IntRect({ (int)sourceOffset.x, (int)sourceOffset.y }, { frameWidth, frameHeight });
+
+        // CORRECCIÓN AQUÍ: Usamos -> porque sprite ahora es un puntero
+        if (sprite) {
+            sprite->setTextureRect(sourceRect);
+        }
     }
 
     ~AnimatedImageRenderer() = default;
@@ -47,14 +47,18 @@ public:
                 currentFrameIndex = looping ? 0 : totalFrameCount - 1;
             }
 
-            sourceRect.x = currentFrameIndex * frameWidth;
-            sourceRect.w = frameWidth;
-            sourceRect.h = frameHeight;
+            sourceRect.position.x = currentFrameIndex * frameWidth;
+            sourceRect.size.x = frameWidth;
+            sourceRect.size.y = frameHeight;
+
+            // CORRECCIÓN AQUÍ TAMBIÉN
+            if (sprite) {
+                sprite->setTextureRect(sourceRect);
+            }
         }
 
         ImageRenderer::Update();
     }
 
     virtual void Render() override { ImageRenderer::Render(); }
-
 };

@@ -209,7 +209,7 @@ public:
         UpdateBullets();
         CheckWinCondition();
 
-        if (Input.GetEvent(SDLK_ESCAPE, KeyState::DOWN)) {
+        if (Input.GetEvent(sf::Keyboard::Key::Escape, KeyState::DOWN)) {
             SM.SetNextScene("MainMenu");
         }
     }

@@ -1,56 +1,55 @@
 #pragma once
 #include <map>
-#include "SDL.h"
 #include <string>
-#include "SDL_ttf.h"
+#include <SFML/Graphics.hpp> // <- Cambio clave: incluimos SFML Graphics
 
 #define RM RenderManager::GetInstance()
 
 class RenderManager {
 public:
-	static RenderManager* GetInstance() {
-		static RenderManager instance;
-		return &instance;
-	}
+    static RenderManager* GetInstance() {
+        static RenderManager instance;
+        return &instance;
+    }
+
 private:
-	SDL_Window* window;
-	SDL_Renderer* renderer;
-	int currentTextureSet;
+    sf::RenderWindow* window; // <- Sustituye a SDL_Window y SDL_Renderer
 
-	std::map<std::string, SDL_Texture*> textures;
-	std::map<std::string, TTF_Font*> fonts;
+    // SFML usa Textures y Fonts de forma muy similar a SDL
+    std::map<std::string, sf::Texture*> textures;
+    std::map<std::string, sf::Font*> fonts;
 
-	SDL_Texture* backgroundTexture = nullptr;
+    sf::Texture* backgroundTexture = nullptr;
+    sf::Sprite* backgroundSprite = nullptr; // En SFML necesitas un Sprite para dibujar una Texture
 
 public:
-	 void Init();
-	 void Release();
-	 void ClearScreen();
-	 void RenderScreen();
+    void Init();
+    void Release();
+    void ClearScreen();
+    void RenderScreen();
 
-	 SDL_Renderer* GetRenderer() { return renderer; }
+    sf::RenderWindow* GetWindow() { return window; } // Ahora devolvemos la ventana de SFML
 
-	 const unsigned int WINDOW_WIDTH = 1360;
-	 const unsigned int WINDOW_HEIGHT = 768;
+    const unsigned int WINDOW_WIDTH = 1360;
+    const unsigned int WINDOW_HEIGHT = 768;
 
-	 void LoadTexture(std::string path);
-	 SDL_Texture* GetTexture(std::string path);
+    void LoadTexture(std::string path);
+    sf::Texture* GetTexture(std::string path);
 
-	 void LoadFont(std::string path);
-	 TTF_Font* GetFont(std::string path);
+    void LoadFont(std::string path);
+    sf::Font* GetFont(std::string path);
 
-	 // Nuevo m�todo para dibujar rect�ngulo
-	 void DrawRect(int x, int y, int w, int h, Uint8 r, Uint8 g, Uint8 b, Uint8 a);
+    // Dibuja un rectángulo en pantalla
+    void DrawRect(int x, int y, int w, int h, std::uint8_t r, std::uint8_t g, std::uint8_t b, std::uint8_t a);
 
-	 void SetBackground(const std::string& path);
-	 void RenderBackground();
+    void SetBackground(const std::string& path);
+    void RenderBackground();
+
 private:
-	RenderManager() = default;
-	RenderManager(RenderManager&) = delete;
-	RenderManager& operator= (const RenderManager&) = delete;
-	~RenderManager();
+    RenderManager() = default;
+    RenderManager(RenderManager&) = delete;
+    RenderManager& operator= (const RenderManager&) = delete;
+    ~RenderManager();
 
-	void InitSDL();
-	void CreateWindowAndRenderer();
-
+    void CreateWindow();
 };

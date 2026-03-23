@@ -19,6 +19,7 @@ int main(int argc, char* args[]) {
 	shape.setFillColor(sf::Color::Green);
 
 	while (window.isOpen())
+	while (window.isOpen())
 	{
 		while (const std::optional event = window.pollEvent())
 		{

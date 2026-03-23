@@ -1,5 +1,7 @@
 #pragma once
-#include <SDL.h>
+#include <SFML/Window.hpp>
+#include <SFML/Graphics.hpp>
+#include "RenderManager.h"
 #include <queue>
 #include <unordered_map>
 
@@ -12,10 +14,12 @@ private:
     int mouseX, mouseY;
     bool leftClick;
 
-    std::unordered_map<Sint32, KeyState> keyReference;
+    // SFML 3.0 usa sf::Keyboard::Key como identificador
+    std::unordered_map<sf::Keyboard::Key, KeyState> keyReference;
 
     InputManager() {
-        SDL_GetMouseState(&mouseX, &mouseY);
+        mouseX = 0;
+        mouseY = 0;
         leftClick = false;
     }
 
@@ -29,7 +33,7 @@ public:
     }
 
     bool Listen() {
-
+        // Actualizamos estados previos
         for (auto& kv : keyReference) {
             if (kv.second == DOWN)
                 kv.second = HOLD;
@@ -37,28 +41,38 @@ public:
                 kv.second = RELEASED;
         }
 
-        SDL_GetMouseState(&mouseX, &mouseY);
+        // Obtener posicion del ratón en SFML
+        if (RM->GetWindow()) {
+            sf::Vector2i mousePos = sf::Mouse::getPosition(*RM->GetWindow());
+            mouseX = mousePos.x;
+            mouseY = mousePos.y;
+        }
 
-        SDL_Event event;
-        while (SDL_PollEvent(&event)) {
-            if (event.type == SDL_QUIT)
-                return true;
-            else if (event.type == SDL_MOUSEBUTTONDOWN) {
-                if (event.button.button == SDL_BUTTON_LEFT) {
-                    leftClick = true;
+        // Bucle de eventos de SFML 3.0 (El que os enseñó el profe)
+        if (RM->GetWindow()) {
+            while (const std::optional event = RM->GetWindow()->pollEvent()) {
+
+                // Cerrar ventana
+                if (event->is<sf::Event::Closed>()) {
+                    return true;
                 }
-            }
-            else if (event.type == SDL_MOUSEBUTTONUP) {
-                if (event.button.button == SDL_BUTTON_LEFT) {
-                    leftClick = false;
+                // Pulsar botón del ratón
+                else if (const auto* mouseBtn = event->getIf<sf::Event::MouseButtonPressed>()) {
+                    if (mouseBtn->button == sf::Mouse::Button::Left) leftClick = true;
                 }
-            }
-            else if (event.type == SDL_KEYDOWN) {
-                if (keyReference[event.key.keysym.sym] != HOLD)
-                    keyReference[event.key.keysym.sym] = DOWN;
-            }
-            else if (event.type == SDL_KEYUP) {
-                keyReference[event.key.keysym.sym] = UP;
+                // Soltar botón del ratón
+                else if (const auto* mouseBtnRel = event->getIf<sf::Event::MouseButtonReleased>()) {
+                    if (mouseBtnRel->button == sf::Mouse::Button::Left) leftClick = false;
+                }
+                // Pulsar tecla
+                else if (const auto* keyPressed = event->getIf<sf::Event::KeyPressed>()) {
+                    if (keyReference[keyPressed->code] != HOLD)
+                        keyReference[keyPressed->code] = DOWN;
+                }
+                // Soltar tecla
+                else if (const auto* keyReleased = event->getIf<sf::Event::KeyReleased>()) {
+                    keyReference[keyReleased->code] = UP;
+                }
             }
         }
         return false;
@@ -66,10 +80,9 @@ public:
 
     inline int GetMouseX() const { return mouseX; }
     inline int GetMouseY() const { return mouseY; }
-
     inline bool GetLeftClick() const { return leftClick; }
 
-    inline bool GetEvent(Sint32 input, KeyState inputValue) {
+    inline bool GetEvent(sf::Keyboard::Key input, KeyState inputValue) {
         return keyReference[input] == inputValue;
     }
 };

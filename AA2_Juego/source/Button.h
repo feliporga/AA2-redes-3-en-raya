@@ -4,8 +4,8 @@
 #include "InputManager.h"
 #include "SceneManager.h"
 #include "AudioManager.h"
-#include "Alien.h"
 #include <string>
+#include <SFML/Graphics.hpp>
 
 class Button : public Object {
 public:
@@ -18,7 +18,7 @@ public:
 
 private:
     Vector2 size;
-    SDL_Color color;
+    sf::Color color; // <-- SFML Color
     std::string text;
     ActionType actionType;
     std::string targetScene;
@@ -30,10 +30,9 @@ private:
     int windowHeight = RM->WINDOW_HEIGHT;
 
 public:
-    // Constructor
     Button(const Vector2& position,
         const Vector2& size,
-        const SDL_Color& color,
+        const sf::Color& color,
         const std::string& text,
         ActionType actionType,
         const std::string& targetScene = "")
@@ -42,10 +41,9 @@ public:
         transform->position = position;
         transform->scale = Vector2(1.0f, 1.0f);
         textRenderer = new TextRenderer(transform, text);
-        textRenderer->SetColor({ 255, 255, 255, 255 });
+        textRenderer->SetColor(sf::Color::White);
     }
 
-    // Destructor
     ~Button() {
         delete textRenderer;
         textRenderer = nullptr;
@@ -90,6 +88,7 @@ public:
     }
 
     void Render() override {
+        // Usamos el DrawRect del RenderManager actualizado
         RM->DrawRect((int)transform->position.x,
             (int)transform->position.y,
             (int)size.x,

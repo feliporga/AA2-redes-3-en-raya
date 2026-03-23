@@ -72,7 +72,6 @@ public:
 	}
 
 	inline void ExitGame() {
-		SDL_Quit();
 		exit(0);
 	}
 };

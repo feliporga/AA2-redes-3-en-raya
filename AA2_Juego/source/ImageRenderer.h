@@ -1,16 +1,17 @@
 #pragma once
 #include "Renderer.h"
+#include <SFML/Graphics.hpp>
 
 class ImageRenderer : public Renderer {
-	//trsnaform para saber scale, position....
-	//path: sprites
-	//sourceOffset: dnd comienza  a print imagen en consola
-	//sourceSize: tamaño textura/imagen
+protected:
+    sf::Sprite* sprite = nullptr; // Lo cambiamos a puntero para SFML 3.0
+
 public:
-	ImageRenderer(Transform* transform, std::string resourcePath, Vector2 sourceOffset, Vector2 sourceSize);
-	~ImageRenderer() = default;
+    ImageRenderer(Transform* transform, std::string resourcePath, Vector2 sourceOffset, Vector2 sourceSize);
 
-	virtual void Update() override;
-	virtual void Render() override;
+    // Necesitamos un destructor para borrar el puntero
+    virtual ~ImageRenderer();
 
+    virtual void Update() override;
+    virtual void Render() override;
 };

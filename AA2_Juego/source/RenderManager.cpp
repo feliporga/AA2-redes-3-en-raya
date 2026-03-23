@@ -1,139 +1,137 @@
 #include "RenderManager.h"
-#include "SDL_image.h"
 #include <iostream>
 #include <cassert>
 
 void RenderManager::Init()
 {
-	try {
-		InitSDL();
-		CreateWindowAndRenderer();
-
-		SetBackground("resources/background1.png");
-	}
-	catch (std::exception& exception)
-	{
-		std::cout << exception.what();
-		SDL_Quit();
-		return;
-	}
+    try {
+        CreateWindow();
+        // Puedes cambiar el fondo inicial por el del 3 en raya cuando lo tengas
+        // SetBackground("resources/background1.png"); 
+    }
+    catch (std::exception& exception)
+    {
+        std::cout << exception.what();
+        return;
+    }
 }
 
 void RenderManager::Release()
 {
-	SDL_DestroyRenderer(renderer);
-	SDL_DestroyWindow(window);
-	SDL_Quit();
+    if (window) {
+        window->close();
+        delete window;
+    }
 }
 
 void RenderManager::ClearScreen()
 {
-	SDL_RenderClear(renderer);
+    // Limpia la pantalla en color negro
+    window->clear(sf::Color::Black);
 }
 
 void RenderManager::RenderScreen()
 {
-	SDL_RenderPresent(renderer); //imprime render
+    // Muestra lo que se ha dibujado en el frame
+    window->display();
 }
 
 void RenderManager::LoadTexture(std::string path)
 {
-	SDL_Surface* surf = IMG_Load(path.c_str());
-	assert(surf);
+    if (textures.find(path) != textures.end())
+        return;
 
-	textures[path] = SDL_CreateTextureFromSurface(renderer, surf);
-	assert(textures[path]);
+    sf::Texture* newTexture = new sf::Texture();
+    if (!newTexture->loadFromFile(path)) {
+        std::cerr << "Error cargando textura: " << path << std::endl;
+        delete newTexture;
+        return;
+    }
 
-	SDL_FreeSurface(surf);
+    textures[path] = newTexture;
 }
 
-SDL_Texture* RenderManager::GetTexture(std::string path)
+sf::Texture* RenderManager::GetTexture(std::string path)
 {
-	//lo busca emtre las texturas, si llega al final es q no lo a encontrado y salta al else
-	if (textures.find(path) != textures.end()) 
-		return textures[path];
-	else
-		return nullptr;
+    if (textures.find(path) != textures.end())
+        return textures[path];
+    return nullptr;
 }
 
 void RenderManager::LoadFont(std::string path)
 {
-	if (fonts.find(path) != fonts.end())
-		return;
+    if (fonts.find(path) != fonts.end())
+        return;
 
-	fonts[path] = TTF_OpenFont(path.c_str(), 24);
+    sf::Font* newFont = new sf::Font();
+    // SFML 3.0: Cambiamos loadFromFile por openFromFile
+    if (!newFont->openFromFile(path)) {
+        std::cerr << "Error cargando fuente: " << path << std::endl;
+        delete newFont;
+        return;
+    }
+
+    fonts[path] = newFont;
 }
 
-TTF_Font* RenderManager::GetFont(std::string path)
+sf::Font* RenderManager::GetFont(std::string path)
 {
-	if (fonts.find(path) != fonts.end())
-		return fonts[path];
-
-	return nullptr;
+    if (fonts.find(path) != fonts.end())
+        return fonts[path];
+    return nullptr;
 }
 
 RenderManager::~RenderManager()
 {
-	for (std::map<std::string, SDL_Texture*>::iterator it = textures.begin();
-		it != textures.end();
-		it++) {
-		SDL_DestroyTexture(it->second);
-	}
+    for (auto const& [key, val] : textures) {
+        delete val;
+    }
+    textures.clear();
+
+    for (auto const& [key, val] : fonts) {
+        delete val;
+    }
+    fonts.clear();
+
+    if (backgroundTexture) delete backgroundTexture;
+    if (backgroundSprite) delete backgroundSprite;
 }
 
-void RenderManager::InitSDL() //esta inicializa SDL
+void RenderManager::CreateWindow()
 {
-	int result = SDL_Init(SDL_INIT_VIDEO);
-
-	bool success = result >= 0;
-	if (!success)
-		throw SDL_GetError();
-
-	if (TTF_Init() == -1)
-		throw SDL_GetError();
+    // SFML 3.0: Agrupamos las variables entre llaves para formar un vector
+    window = new sf::RenderWindow(sf::VideoMode({ WINDOW_WIDTH, WINDOW_HEIGHT }), "3 en Raya Online");
+    window->setFramerateLimit(60);
 }
 
-void RenderManager::CreateWindowAndRenderer() //esta crea ventana y renderer
+void RenderManager::DrawRect(int x, int y, int w, int h, std::uint8_t r, std::uint8_t g, std::uint8_t b, std::uint8_t a)
 {
-	int result = SDL_CreateWindowAndRenderer( //crear ventana
-		WINDOW_WIDTH,
-		WINDOW_HEIGHT,
-		SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE,
-		&window,
-		&renderer);
+    // SFML usa una clase sf::RectangleShape para dibujar primitivas
+    sf::RectangleShape rect(sf::Vector2f((float)w, (float)h));
+    rect.setPosition({ (float)x, (float)y }); // SFML 3.0 usa {} para vectores
+    rect.setFillColor(sf::Color(r, g, b, a));
 
-	bool success = result >= 0;
-	if (!success)
-		throw SDL_GetError();
-
-	SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255); //color de fondo de ventana
+    if (window) {
+        window->draw(rect);
+    }
 }
 
-void RenderManager::DrawRect(int x, int y, int w, int h, Uint8 r, Uint8 g, Uint8 b, Uint8 a)
+void RenderManager::SetBackground(const std::string& path)
 {
-	SDL_SetRenderDrawColor(renderer, r, g, b, a);
-	SDL_Rect rect = { x, y, w, h };
-	SDL_RenderFillRect(renderer, &rect);
-	// Opcionalmente, volver a setear el color por defecto
-	SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+    if (backgroundTexture) {
+        delete backgroundTexture;
+        delete backgroundSprite;
+    }
+
+    backgroundTexture = new sf::Texture();
+    if (backgroundTexture->loadFromFile(path)) {
+        backgroundSprite = new sf::Sprite(*backgroundTexture);
+    }
 }
 
-void RenderManager::SetBackground(const std::string& path) {
-	if (backgroundTexture) {
-		SDL_DestroyTexture(backgroundTexture);
-	}
-
-	SDL_Surface* surf = IMG_Load(path.c_str());
-	assert(surf);
-
-	backgroundTexture = SDL_CreateTextureFromSurface(renderer, surf);
-	assert(backgroundTexture);
-
-	SDL_FreeSurface(surf);
-}
-
-void RenderManager::RenderBackground() {
-	if (backgroundTexture) {
-		SDL_RenderCopy(renderer, backgroundTexture, nullptr, nullptr);
-	}
+void RenderManager::RenderBackground()
+{
+    if (backgroundSprite) {
+        window->draw(*backgroundSprite);
+    }
 }

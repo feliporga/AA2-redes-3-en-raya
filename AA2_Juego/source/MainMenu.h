@@ -44,11 +44,10 @@ public:
         SPAWN.SpawnObject(textMenu);
 
         //Games
-        buttonSpaceInvaders = new Button(Vector2(windowWidth / 2 - 125.0f, windowHeight / 2 - 100), Vector2(250, 50), SDL_Color{ 255, 0, 255, 255 }, "SPACE INVADERS", Button::ActionType::ChangeScene, "Space Invaders");
-        
-        buttonAudio = new Button(Vector2(windowWidth / 2 - 125.0f, windowHeight / 2 + 170), Vector2(250, 50), SDL_Color{ 255, 0, 255, 255 }, "Toggle Audio", Button::ActionType::ToggleAudio);
-        buttonExit = new Button(Vector2(windowWidth / 2 - 125.0f, windowHeight / 2 + 260), Vector2(250, 50), SDL_Color{ 255, 0, 255, 255 }, "Exit Game", Button::ActionType::ExitGame);
+        buttonSpaceInvaders = new Button(Vector2(windowWidth / 2 - 125.0f, windowHeight / 2 - 100), Vector2(250, 50), sf::Color(255, 0, 255, 255), "SPACE INVADERS", Button::ActionType::ChangeScene, "Space Invaders");
 
+        buttonAudio = new Button(Vector2(windowWidth / 2 - 125.0f, windowHeight / 2 + 170), Vector2(250, 50), sf::Color(255, 0, 255, 255), "Toggle Audio", Button::ActionType::ToggleAudio);
+        buttonExit = new Button(Vector2(windowWidth / 2 - 125.0f, windowHeight / 2 + 260), Vector2(250, 50), sf::Color(255, 0, 255, 255), "Exit Game", Button::ActionType::ExitGame);
 
         SPAWN.SpawnObject(buttonSpaceInvaders);
         SPAWN.SpawnObject(buttonAudio);

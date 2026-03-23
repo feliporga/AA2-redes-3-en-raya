@@ -4,17 +4,16 @@
 #include "SceneManager.h"
 
 
-void Ship::MovingState(){
-    if (Input.GetEvent(SDLK_a, KeyState::HOLD)) {
+void Ship::MovingState() {
+    if (Input.GetEvent(sf::Keyboard::Key::A, KeyState::HOLD)) {
         transform->position.x -= PLAYER_SPEED_SPACEINVADERS * TIME.GetDeltaTime();
     }
 
-    if (Input.GetEvent(SDLK_d, KeyState::HOLD)) {
+    if (Input.GetEvent(sf::Keyboard::Key::D, KeyState::HOLD)) {
         transform->position.x += PLAYER_SPEED_SPACEINVADERS * TIME.GetDeltaTime();
     }
 
-
-    if (Input.GetEvent(SDLK_SPACE, KeyState::DOWN) && bulletTimer <= 0.0f) {
+    if (Input.GetEvent(sf::Keyboard::Key::Space, KeyState::DOWN) && bulletTimer <= 0.0f) {
         shootingShip = true;
         bulletTimer = bulletCooldown;
         ShootSound();

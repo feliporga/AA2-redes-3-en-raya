@@ -5,20 +5,20 @@
 class TextObject : public Object
 {
 private:
-	TextRenderer* tr;
+    TextRenderer* tr;
 
 public:
-	TextObject(std::string text) : Object() {
-		tr = new TextRenderer(transform, text);
-		renderer = tr;
-		tr->SetColor(SDL_Color{ 0xFF, 0xFF, 0xFF, 0xFF });
-	}
+    TextObject(std::string text) : Object() {
+        tr = new TextRenderer(transform, text);
+        renderer = tr;
+        tr->SetColor(sf::Color::White); // Cambio a color de SFML
+    }
 
-	~TextObject() {
-		tr = nullptr;
-	}
+    ~TextObject() {
+        tr = nullptr;
+    }
 
-	void SetText(std::string text) {
-		tr->SetText(text);
-	}
+    void SetText(std::string text) {
+        tr->SetText(text);
+    }
 };
