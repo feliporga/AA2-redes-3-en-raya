@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ConstantsByGame>
+	<SpaceInvaders>
+		<Constant name="ENEMY_MOVE_SPEED_SPACEINVADERS" value="25.0f" />
+		<Constant name="ENEMY_MOVE_COOLDOWN_SPACEINVADERS" value="1.0f" />
+		<Constant name="ENEMY_DROP_AMOUNT_SPACEINVADERS" value="20.0f" />
+		<Constant name="PLAYER_SPEED_SPACEINVADERS" value="200.0f" />
+		<Constant name="ENEMY_ROWS_SPACEINVADERS" value="4" />
+		<Constant name="ENEMY_COLS_SPACEINVADERS" value="8" />
+	</SpaceInvaders>
+</ConstantsByGame>
