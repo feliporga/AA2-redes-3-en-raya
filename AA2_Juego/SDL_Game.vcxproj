@@ -206,13 +206,14 @@ xcopy /d /y "$(SolutionDir)\resources\*.*" "$(TargetDir)\resources\"</Command>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)\dependencies\SDL2_image-2.0.5\include;$(SolutionDir)\dependencies\SDL2-2.0.16\include;$(SolutionDir)\dependencies\SDL2_ttf-2.0.15\include;$(SolutionDir)\dependencies\SDL2_mixer-2.0.4\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\dependencies\SDL2_image-2.0.5\include;$(SolutionDir)\dependencies\SDL2-2.0.16\include;$(SolutionDir)\dependencies\SDL2_ttf-2.0.15\include;$(SolutionDir)\dependencies\SDL2_mixer-2.0.4\include;$(SolutionDir)\dependencies\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(SolutionDir)\dependencies\SDL2_image-2.0.5\lib\$(PlatformTarget);$(SolutionDir)\dependencies\SDL2-2.0.16\lib\$(PlatformTarget);$(SolutionDir)\dependencies\SDL2_ttf-2.0.15\lib\$(PlatformTarget);$(SolutionDir)\dependencies\SDL2_mixer-2.0.4\lib\$(PlatformTarget);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>SDL2.lib;SDL2main.lib;SDL2_image.lib;SDL2_ttf.lib;SDL2_mixer.lib;$(CoreLibraryDependencies);%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)\dependencies\SDL2_image-2.0.5\lib\$(PlatformTarget);$(SolutionDir)\dependencies\SDL2-2.0.16\lib\$(PlatformTarget);$(SolutionDir)\dependencies\SDL2_ttf-2.0.15\lib\$(PlatformTarget);$(SolutionDir)\dependencies\SDL2_mixer-2.0.4\lib\$(PlatformTarget);$(SolutionDir)\dependencies\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>SDL2.lib;SDL2main.lib;SDL2_image.lib;SDL2_ttf.lib;SDL2_mixer.lib;$(CoreLibraryDependencies);sfml-graphics.lib;sfml-window.lib;sfml-audio.lib;sfml-network.lib;sfml-system.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>xcopy /d /y "$(SolutionDir)\dependencies\SDL2_image-2.0.5\lib\$(PlatformTarget)\*.dll" "$(TargetDir)"
@@ -230,15 +231,16 @@ xcopy /d /y "$(SolutionDir)\resources\*.*" "$(TargetDir)\resources\"</Command>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)\dependencies\SDL2_image-2.0.5\include;$(SolutionDir)\dependencies\SDL2-2.0.16\include;$(SolutionDir)\dependencies\SDL2_ttf-2.0.15\include;$(SolutionDir)\dependencies\SDL2_mixer-2.0.4\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\dependencies\SDL2_image-2.0.5\include;$(SolutionDir)\dependencies\SDL2-2.0.16\include;$(SolutionDir)\dependencies\SDL2_ttf-2.0.15\include;$(SolutionDir)\dependencies\SDL2_mixer-2.0.4\include;$(SolutionDir)\dependencies\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(SolutionDir)\dependencies\SDL2_image-2.0.5\lib\$(PlatformTarget);$(SolutionDir)\dependencies\SDL2-2.0.16\lib\$(PlatformTarget);$(SolutionDir)\dependencies\SDL2_ttf-2.0.15\lib\$(PlatformTarget);$(SolutionDir)\dependencies\SDL2_mixer-2.0.4\lib\$(PlatformTarget);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>SDL2.lib;SDL2main.lib;SDL2_image.lib;SDL2_ttf.lib;SDL2_mixer.lib;$(CoreLibraryDependencies);%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)\dependencies\SDL2_image-2.0.5\lib\$(PlatformTarget);$(SolutionDir)\dependencies\SDL2-2.0.16\lib\$(PlatformTarget);$(SolutionDir)\dependencies\SDL2_ttf-2.0.15\lib\$(PlatformTarget);$(SolutionDir)\dependencies\SDL2_mixer-2.0.4\lib\$(PlatformTarget);$(SolutionDir)\dependencies\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>SDL2.lib;SDL2main.lib;SDL2_image.lib;SDL2_ttf.lib;SDL2_mixer.lib;$(CoreLibraryDependencies);sfml-graphics.lib;sfml-window.lib;sfml-audio.lib;sfml-network.lib;sfml-system.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>xcopy /d /y "$(SolutionDir)\dependencies\SDL2_image-2.0.5\lib\$(PlatformTarget)\*.dll" "$(TargetDir)"
