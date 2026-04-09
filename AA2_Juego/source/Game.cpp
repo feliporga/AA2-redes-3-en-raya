@@ -30,14 +30,16 @@ void Game::Init() {
     AM.LoadSong("menuMusic");
     AM.LoadSong("spaceMusic");
 
-    assert(SM.AddScene("MainMenu", new MainMenu()));
-    
-    assert(SM.AddScene("GameOver", new GameOverScene()));
-    assert(SM.AddScene("YouWon", new YouWonScene()));
+    AM.LoadSong("menuMusic");
+    AM.LoadSong("spaceMusic");
 
-    assert(SM.AddScene("Space Invaders", new SpaceInvaders()));
+    // ¡FUERA ASSERTS! Metemos las escenas directamente a la fuerza
+    SM.AddScene("MainMenu", new MainMenu());
+    SM.AddScene("GameOver", new GameOverScene());
+    SM.AddScene("YouWon", new YouWonScene());
+    SM.AddScene("Space Invaders", new SpaceInvaders());
 
-    assert(SM.InitFirstScene("MainMenu"));
+    SM.InitFirstScene("MainMenu");
 
 }
 

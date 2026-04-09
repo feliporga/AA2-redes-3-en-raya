@@ -9,96 +9,70 @@
 #include <iostream>
 #include <string>
 
-
 class MainMenu : public Scene
 {
 private:
-
     float windowWidth = RM->WINDOW_WIDTH;
     float windowHeight = RM->WINDOW_HEIGHT;
 
-    Object* textMenu;
+    Object* textMenu = nullptr;
 
-    Button* buttonSplat;
-    Button* buttonSpaceInvaders;
-    Button* buttonTanks;
-    Button* buttonSprite;
-    Button* buttonRanking;
-    Button* buttonAudio;
-    Button* buttonExit;
+    Button* buttonSpaceInvaders = nullptr;
+    Button* buttonAudio = nullptr;
+    Button* buttonExit = nullptr;
 
-    Object* buttonSplatText;
-    Object* buttonSpaceInvadersText;
-    Object* buttonTanksText;
-    Object* buttonSpriteText;
-    Object* buttonRankingText;
-    Object* buttonAudioText;
-    Object* buttonExitText;
+    Object* buttonSpaceInvadersText = nullptr;
+    Object* buttonAudioText = nullptr;
+    Object* buttonExitText = nullptr;
 
 public:
-    
     void OnEnter() override {
         AM.PlaySong("menuMusic");
+
         textMenu = new TextObject("MAIN MENU");
-        textMenu->GetTransform()->position = Vector2(windowWidth / 2 - 25.0f, windowHeight / 2 - 150);
+        textMenu->GetTransform()->position = Vector2(windowWidth / 2 - 75.0f, windowHeight / 2 - 150);
         SPAWN.SpawnObject(textMenu);
 
-        //Games
-        buttonSpaceInvaders = new Button(Vector2(windowWidth / 2 - 125.0f, windowHeight / 2 - 100), Vector2(250, 50), sf::Color(255, 0, 255, 255), "SPACE INVADERS", Button::ActionType::ChangeScene, "Space Invaders");
+        float btn1_Y = windowHeight / 2 - 50;
+        float btn2_Y = windowHeight / 2 + 30;
+        float btn3_Y = windowHeight / 2 + 110;
 
-        buttonAudio = new Button(Vector2(windowWidth / 2 - 125.0f, windowHeight / 2 + 170), Vector2(250, 50), sf::Color(255, 0, 255, 255), "Toggle Audio", Button::ActionType::ToggleAudio);
-        buttonExit = new Button(Vector2(windowWidth / 2 - 125.0f, windowHeight / 2 + 260), Vector2(250, 50), sf::Color(255, 0, 255, 255), "Exit Game", Button::ActionType::ExitGame);
+        float btn_X = windowWidth / 2 - 125.0f;
+
+        buttonSpaceInvaders = new Button(Vector2(btn_X, btn1_Y), Vector2(250, 50), sf::Color(255, 0, 255, 255), "", Button::ActionType::ChangeScene, "Space Invaders");
+        buttonAudio = new Button(Vector2(btn_X, btn2_Y), Vector2(250, 50), sf::Color(255, 0, 255, 255), "", Button::ActionType::ToggleAudio);
+        buttonExit = new Button(Vector2(btn_X, btn3_Y), Vector2(250, 50), sf::Color(255, 0, 255, 255), "", Button::ActionType::ExitGame);
 
         SPAWN.SpawnObject(buttonSpaceInvaders);
         SPAWN.SpawnObject(buttonAudio);
         SPAWN.SpawnObject(buttonExit);
 
         buttonSpaceInvadersText = new TextObject("TIC TAC TOE");
-        buttonSpaceInvadersText->GetTransform()->position = Vector2(windowWidth / 2 - 30.0f, windowHeight / 2 - 40);
+        buttonSpaceInvadersText->GetTransform()->position = Vector2(windowWidth / 2 - 80.0f, btn1_Y + 10);
         SPAWN.SpawnObject(buttonSpaceInvadersText);
 
-        buttonAudioText = new TextObject("EN/DISABLE AUDIO");
-        buttonAudioText->GetTransform()->position = Vector2(windowWidth / 2 - 65.0f, windowHeight / 2 + 230);
+        buttonAudioText = new TextObject("TOGGLE AUDIO");
+        buttonAudioText->GetTransform()->position = Vector2(windowWidth / 2 - 90.0f, btn2_Y + 10);
         SPAWN.SpawnObject(buttonAudioText);
 
-        buttonExitText = new TextObject("EXIT");
-        buttonExitText->GetTransform()->position = Vector2(windowWidth / 2 + 25.0f, windowHeight / 2 + 320);
+        buttonExitText = new TextObject("EXIT GAME");
+        buttonExitText->GetTransform()->position = Vector2(windowWidth / 2 - 71.0f, btn3_Y + 10);
         SPAWN.SpawnObject(buttonExitText);
     }
 
     ~MainMenu()
     {
-        buttonSplatText->Destroy();
-        buttonSplatText = nullptr;
-
-        buttonSpaceInvadersText->Destroy();
-        buttonSpaceInvadersText = nullptr;
-
-        buttonTanksText->Destroy();
-        buttonTanksText = nullptr;
-
-        textMenu->Destroy();
-        textMenu = nullptr;
-
-        buttonSpriteText->Destroy();
-        buttonSpriteText = nullptr;
-
-        buttonRankingText->Destroy();
-        buttonRankingText = nullptr;
-        
-        buttonAudioText->Destroy();
-        buttonAudioText = nullptr;
-        
-        buttonExitText->Destroy();
-        buttonExitText = nullptr;
+        if (buttonSpaceInvadersText) { buttonSpaceInvadersText->Destroy(); buttonSpaceInvadersText = nullptr; }
+        if (buttonAudioText) { buttonAudioText->Destroy(); buttonAudioText = nullptr; }
+        if (buttonExitText) { buttonExitText->Destroy(); buttonExitText = nullptr; }
+        if (textMenu) { textMenu->Destroy(); textMenu = nullptr; }
     }
 
-    void OnExit() override 
+    void OnExit() override
     {
         AM.StopAudio();
         Scene::OnExit();
     }
-
 
     void Update() override
     {
@@ -109,5 +83,4 @@ public:
     {
         Scene::Render();
     }
-
 };

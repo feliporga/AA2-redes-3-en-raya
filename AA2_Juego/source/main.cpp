@@ -1,5 +1,3 @@
-#include <SFML/Graphics.hpp>
-
 #include "Game.h"
 #include "InputManager.h"
 #include "ConstantsManager.h"
@@ -11,63 +9,45 @@
 
 GameConstantsManager constantsManager;
 
-int main(int argc, char* args[]) {
-	
-	
-	sf::RenderWindow window(sf::VideoMode({ 200, 200 }), "SFML works!");
-	sf::CircleShape shape(100.f);
-	shape.setFillColor(sf::Color::Green);
+// En SFML puro (sin SDL), el main vuelve a ser el estándar de C++
+int main() {
+    // Cargar las constantes desde el archivo XML
+    constantsManager.LoadFromXML("resources/valuesGame.xml");
 
-	while (window.isOpen())
-	while (window.isOpen())
-	{
-		while (const std::optional event = window.pollEvent())
-		{
-			if (event->is<sf::Event::Closed>())
-				window.close();
-		}
+    Game game;
 
-		window.clear();
-		window.draw(shape);
-		window.display();
-	}
-	
-	
-	
-	
-	/*
-	// Cargar las constantes desde el archivo XML
-	constantsManager.LoadFromXML("resources/valuesGame.xml");
+    srand((unsigned int)time(NULL));
 
-	Game game;
+    try
+    {
+        // Esto inicializa el RenderManager y crea tu ventana de verdad
+        game.Init();
+    }
+    catch (std::exception& exception)
+    {
+        std::cout << "Error: " << exception.what() << std::endl;
+        game.Release();
+        return -1;
+    }
 
-	srand(time(NULL));
+    bool playing = true;
+    while (playing)
+    {
+        TIME.Update();
 
-	try
-	{
-		game.Init();
-	}
-	catch (std::exception& exception)
-	{
-		std::cout << "Error: " << exception.what();
-		game.Release();
-		return -1;
-	}
+        if (TIME.ShouldUpdateGame())
+        {
+            // Input.Listen() devuelve true si el jugador pulsa la 'X' de cerrar ventana
+            playing = !Input.Listen();
 
-	bool playing = true;
-	while (playing)
-	{
-		TIME.Update();
-		if (TIME.ShouldUpdateGame())
-		{
-			playing = !Input.Listen();
-			game.Update();
-			game.Render();
-			TIME.ResetDeltaTime();
-		}
-	}
+            game.Update();
+            game.Render();
 
-	game.Release();
-	*/
-	return 0;
+            TIME.ResetDeltaTime();
+        }
+    }
+
+    game.Release();
+
+    return 0;
 }
