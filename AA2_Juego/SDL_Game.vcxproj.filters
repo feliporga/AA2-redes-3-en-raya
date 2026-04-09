@@ -142,6 +142,9 @@
     <ClInclude Include="source\RankingScene.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="source\TextField.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="resources\highScores.bin">

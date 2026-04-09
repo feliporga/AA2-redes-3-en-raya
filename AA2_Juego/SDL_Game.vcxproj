@@ -64,6 +64,7 @@
     <ClInclude Include="source\Vector2.h" />
     <ClInclude Include="source\YouWonScene.h" />
     <ClInclude Include="source\TicTacToe.h" />
+    <ClInclude Include="source\TextField.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="resources\highScore.bin" />

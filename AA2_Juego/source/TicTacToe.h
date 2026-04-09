@@ -18,6 +18,7 @@ private:
     float cellSize;
 
     TextObject* statusText;
+    TextObject* roomCodeText;
     PlayerPiece* cellSprites[6][6];
     Button* backButton;
     TextObject* backButtonText;

@@ -121,6 +121,19 @@ void TicTacToe::OnEnter() {
     backButtonText = new TextObject("VOLVER");
     backButtonText->GetTransform()->position = Vector2(75.0f, 60.0f);
     SPAWN.SpawnObject(backButtonText);
+
+    std::string roomCode = SM.sharedData;
+    if (roomCode == "") {
+        roomCode = "SALA PUBLICA"; // Por si entran sin poner código
+    }
+    else {
+        roomCode = "SALA: " + roomCode;
+    }
+
+    roomCodeText = new TextObject(roomCode);
+    roomCodeText->GetTransform()->position = Vector2(20.0f, 20.0f); // Esquina superior izquierda
+    roomCodeText->SetColor(sf::Color::Cyan); // Color cian para destacarlo
+    SPAWN.SpawnObject(roomCodeText);
 }
 
 void TicTacToe::OnExit() {

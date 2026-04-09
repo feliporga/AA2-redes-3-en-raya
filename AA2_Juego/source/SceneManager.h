@@ -17,6 +17,7 @@ private:
 	SceneManager& operator = (const SceneManager&) = delete;
 
 public:
+	std::string sharedData = "";
 	inline static SceneManager& Instance()
 	{
 		static SceneManager sm;
