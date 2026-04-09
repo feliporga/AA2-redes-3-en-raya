@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="source\RankingScene.cpp" />
     <ClCompile Include="source\PlayerPiece.cpp" />
     <ClCompile Include="source\Game.cpp" />
     <ClCompile Include="source\ImageRenderer.cpp" />
@@ -34,6 +35,7 @@
     <Image Include="resources\player4.png" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="source\RankingScene.h" />
     <ClInclude Include="source\PlayerPiece.h" />
     <ClInclude Include="source\AABB.h" />
     <ClInclude Include="source\Button.h" />

@@ -5,6 +5,7 @@
 #include "MainMenu.h"
 #include "TicTacToe.h"
 #include "YouWonScene.h"
+#include "RankingScene.h"
 #include "GameOverScene.h"
 #include <cassert>
 
@@ -37,6 +38,7 @@ void Game::Init() {
     SM.AddScene("GameOver", new GameOverScene());
     SM.AddScene("YouWon", new YouWonScene());
     SM.AddScene("TicTacToe", new TicTacToe());
+    SM.AddScene("Ranking", new RankingScene());
 
     SM.InitFirstScene("MainMenu");
 
