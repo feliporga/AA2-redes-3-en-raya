@@ -3,7 +3,7 @@
 #include "SceneManager.h"
 #include "AudioManager.h"
 #include "MainMenu.h"
-#include "SpaceInvaders.h"
+#include "TicTacToe.h"
 #include "YouWonScene.h"
 #include "GameOverScene.h"
 #include <cassert>
@@ -37,7 +37,7 @@ void Game::Init() {
     SM.AddScene("MainMenu", new MainMenu());
     SM.AddScene("GameOver", new GameOverScene());
     SM.AddScene("YouWon", new YouWonScene());
-    SM.AddScene("Space Invaders", new SpaceInvaders());
+    SM.AddScene("TicTacToe", new TicTacToe());
 
     SM.InitFirstScene("MainMenu");
 

@@ -24,60 +24,30 @@
     <ClCompile Include="source\RenderManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\Ship.cpp">
+    <ClCompile Include="source\ImageRenderer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\ImageRenderer.cpp">
+    <ClCompile Include="source\TicTacToe.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\PlayerPiece.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <Image Include="resources\enemy.png">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="resources\player.png">
-      <Filter>Resource Files</Filter>
-    </Image>
     <Image Include="resources\background1.png">
       <Filter>Resource Files</Filter>
     </Image>
-    <Image Include="resources\background2.png">
+    <Image Include="resources\player1.png">
       <Filter>Resource Files</Filter>
     </Image>
-    <Image Include="resources\background3.png">
+    <Image Include="resources\player2.png">
       <Filter>Resource Files</Filter>
     </Image>
-    <Image Include="resources\bullet.png">
+    <Image Include="resources\player3.png">
       <Filter>Resource Files</Filter>
     </Image>
-    <Image Include="resources\enemySplat1.png">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="resources\enemySplat2.png">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="resources\enemySplat3.png">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="resources\enemyTank1.png">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="resources\enemyTank2.png">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="resources\enemyTank3.png">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="resources\PlayerSpace.png">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="resources\PlayerSplat.png">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="resources\PlayerTank.png">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="resources\spashscreen.png">
+    <Image Include="resources\player4.png">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>
@@ -91,13 +61,7 @@
     <ClInclude Include="source\Alien.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="source\SpaceInvaders.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="source\RenderManager.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="source\Ship.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="source\BulletShip.h">
@@ -173,6 +137,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="source\AABB.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\TicTacToe.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\PlayerPiece.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

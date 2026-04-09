@@ -39,7 +39,7 @@ public:
 
         float btn_X = windowWidth / 2 - 125.0f;
 
-        buttonSpaceInvaders = new Button(Vector2(btn_X, btn1_Y), Vector2(250, 50), sf::Color(255, 0, 255, 255), "", Button::ActionType::ChangeScene, "Space Invaders");
+        buttonSpaceInvaders = new Button(Vector2(btn_X, btn1_Y), Vector2(250, 50), sf::Color(255, 0, 255, 255), "", Button::ActionType::ChangeScene, "TicTacToe");
         buttonAudio = new Button(Vector2(btn_X, btn2_Y), Vector2(250, 50), sf::Color(255, 0, 255, 255), "", Button::ActionType::ToggleAudio);
         buttonExit = new Button(Vector2(btn_X, btn3_Y), Vector2(250, 50), sf::Color(255, 0, 255, 255), "", Button::ActionType::ExitGame);
 
