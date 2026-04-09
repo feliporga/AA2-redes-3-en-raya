@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="source\Login.cpp" />
     <ClCompile Include="source\Game.cpp" />
     <ClCompile Include="source\ImageRenderer.cpp" />
     <ClCompile Include="source\main.cpp" />
@@ -44,6 +45,7 @@
     <Image Include="resources\spashscreen.png" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="source\Login.h" />
     <ClInclude Include="source\AABB.h" />
     <ClInclude Include="source\BulletAlien.h" />
     <ClInclude Include="source\Button.h" />

@@ -6,6 +6,7 @@
 #include "AudioManager.h"
 #include <string>
 #include <SFML/Graphics.hpp>
+#include "TextRenderer.h"
 
 class Button : public Object {
 public:
