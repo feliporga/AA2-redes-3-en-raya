@@ -33,7 +33,6 @@ void Game::Init() {
     AM.LoadSong("menuMusic");
     AM.LoadSong("spaceMusic");
 
-    // ¡FUERA ASSERTS! Metemos las escenas directamente a la fuerza
     SM.AddScene("MainMenu", new MainMenu());
     SM.AddScene("GameOver", new GameOverScene());
     SM.AddScene("YouWon", new YouWonScene());

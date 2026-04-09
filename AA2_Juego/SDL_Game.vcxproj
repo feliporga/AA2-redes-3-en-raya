@@ -36,13 +36,10 @@
   <ItemGroup>
     <ClInclude Include="source\PlayerPiece.h" />
     <ClInclude Include="source\AABB.h" />
-    <ClInclude Include="source\BulletAlien.h" />
     <ClInclude Include="source\Button.h" />
     <ClInclude Include="source\GameOverScene.h" />
-    <ClInclude Include="source\Alien.h" />
     <ClInclude Include="source\AnimatedImageRenderer.h" />
     <ClInclude Include="source\AudioManager.h" />
-    <ClInclude Include="source\BulletShip.h" />
     <ClInclude Include="source\ConstantsManager.h" />
     <ClInclude Include="source\Game.h" />
     <ClInclude Include="source\GameConstants.h" />

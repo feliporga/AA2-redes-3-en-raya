@@ -2,7 +2,7 @@
 #include "Scene.h"
 #include "TextObject.h"
 #include "Button.h"
-#include "PlayerPiece.h" // <-- Incluimos al nuevo jugador
+#include "PlayerPiece.h"
 #include <string>
 
 class TicTacToe : public Scene {
@@ -18,11 +18,10 @@ private:
     float cellSize;
 
     TextObject* statusText;
-    PlayerPiece* cellSprites[6][6]; // <-- Array de fichas (PlayerPiece)
+    PlayerPiece* cellSprites[6][6];
     Button* backButton;
-    TextObject* backButtonText; // <-- Añadimos esto para centrar el texto
+    TextObject* backButtonText;
 
-    // Lógica interna
     std::string GetPlayerName(int player);
     bool CheckWin(int p);
     void HandleInput();

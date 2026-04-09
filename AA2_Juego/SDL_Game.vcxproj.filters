@@ -58,13 +58,7 @@
     <ClInclude Include="source\Vector2.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="source\Alien.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="source\RenderManager.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="source\BulletShip.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="source\AudioManager.h">
@@ -95,9 +89,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="source\SceneManager.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="source\Spawner.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="source\Rigidbody.h">
@@ -133,9 +124,6 @@
     <ClInclude Include="source\Button.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="source\BulletAlien.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="source\AABB.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -143,6 +131,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="source\PlayerPiece.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Spawner.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
