@@ -2,11 +2,13 @@
 #include "RenderManager.h"
 #include "SceneManager.h"
 #include "AudioManager.h"
+#include "LoginScene.h"
 #include "MainMenu.h"
-#include "SpaceInvaders.h"
+#include "TicTacToe.h"
 #include "YouWonScene.h"
+#include "RankingScene.h"
 #include "GameOverScene.h"
-#include <cassert>
+#include <cassert>2
 
 
 void Game::Init() {
@@ -33,13 +35,14 @@ void Game::Init() {
     AM.LoadSong("menuMusic");
     AM.LoadSong("spaceMusic");
 
-    // ¡FUERA ASSERTS! Metemos las escenas directamente a la fuerza
+    SM.AddScene("Login", new LoginScene());
     SM.AddScene("MainMenu", new MainMenu());
     SM.AddScene("GameOver", new GameOverScene());
     SM.AddScene("YouWon", new YouWonScene());
-    SM.AddScene("Space Invaders", new SpaceInvaders());
+    SM.AddScene("TicTacToe", new TicTacToe());
+    SM.AddScene("Ranking", new RankingScene());
 
-    SM.InitFirstScene("MainMenu");
+    SM.InitFirstScene("Login");
 
 }
 

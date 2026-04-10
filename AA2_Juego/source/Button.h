@@ -6,7 +6,6 @@
 #include "AudioManager.h"
 #include <string>
 #include <SFML/Graphics.hpp>
-#include "TextRenderer.h"
 
 class Button : public Object {
 public:
@@ -19,13 +18,13 @@ public:
 
 private:
     Vector2 size;
-    sf::Color color; // <-- SFML Color
+    sf::Color color;
     std::string text;
     ActionType actionType;
     std::string targetScene;
     TextRenderer* textRenderer = nullptr;
 
-    bool isPressed = false;
+    bool prevLeftClick; // <-- NUEVA VARIABLE DE SEGURIDAD
 
     int windowWidth = RM->WINDOW_WIDTH;
     int windowHeight = RM->WINDOW_HEIGHT;
@@ -43,6 +42,10 @@ public:
         transform->scale = Vector2(1.0f, 1.0f);
         textRenderer = new TextRenderer(transform, text);
         textRenderer->SetColor(sf::Color::White);
+
+        // MAGIA AQUÍ: Al nacer el botón, miramos si el ratón ya estaba pulsado
+        // Así evitamos que se pulse solo al cambiar de escena
+        prevLeftClick = Input.GetLeftClick();
     }
 
     ~Button() {
@@ -53,15 +56,14 @@ public:
     void Update() override {
         float mouseX = (float)Input.GetMouseX();
         float mouseY = (float)Input.GetMouseY();
+        bool currentLeftClick = Input.GetLeftClick();
 
         bool isMouseOver =
             mouseX >= transform->position.x && mouseX <= transform->position.x + size.x &&
             mouseY >= transform->position.y && mouseY <= transform->position.y + size.y;
 
-        if (isMouseOver && Input.GetLeftClick()) {
-            if (isPressed)
-                return;
-            isPressed = true;
+        // Solo se activa si es el MILISEGUNDO EXACTO en el que pulsas el botón
+        if (isMouseOver && currentLeftClick && !prevLeftClick) {
             switch (actionType) {
             case ActionType::ChangeScene:
                 SM.SetNextScene(targetScene);
@@ -83,13 +85,12 @@ public:
                 break;
             }
         }
-        else {
-            isPressed = false;
-        }
+
+        // Guardamos el estado para el siguiente frame
+        prevLeftClick = currentLeftClick;
     }
 
     void Render() override {
-        // Usamos el DrawRect del RenderManager actualizado
         RM->DrawRect((int)transform->position.x,
             (int)transform->position.y,
             (int)size.x,

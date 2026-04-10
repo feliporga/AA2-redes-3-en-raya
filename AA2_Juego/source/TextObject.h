@@ -21,4 +21,8 @@ public:
     void SetText(std::string text) {
         tr->SetText(text);
     }
+
+    void SetColor(sf::Color color) {
+        tr->SetColor(color);
+    }
 };

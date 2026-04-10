@@ -6,6 +6,7 @@
 #include "Renderer.h"
 #include "TextObject.h"
 #include "Button.h"
+#include "TextField.h"
 #include <iostream>
 #include <string>
 
@@ -16,12 +17,17 @@ private:
     float windowHeight = RM->WINDOW_HEIGHT;
 
     Object* textMenu = nullptr;
+    TextField* roomField = nullptr;
 
-    Button* buttonSpaceInvaders = nullptr;
+    Button* btnJoin = nullptr;
+    Button* btnCreate = nullptr;
+    Button* buttonRanking = nullptr;
     Button* buttonAudio = nullptr;
     Button* buttonExit = nullptr;
 
-    Object* buttonSpaceInvadersText = nullptr;
+    Object* btnJoinText = nullptr;
+    Object* btnCreateText = nullptr;
+    Object* buttonRankingText = nullptr;
     Object* buttonAudioText = nullptr;
     Object* buttonExitText = nullptr;
 
@@ -29,43 +35,62 @@ public:
     void OnEnter() override {
         AM.PlaySong("menuMusic");
 
-        textMenu = new TextObject("MAIN MENU");
-        textMenu->GetTransform()->position = Vector2(windowWidth / 2 - 75.0f, windowHeight / 2 - 150);
+        textMenu = new TextObject("3 EN RAYA ONLINE");
+        textMenu->GetTransform()->position = Vector2(windowWidth / 2 - 110.0f, windowHeight / 2 - 180);
         SPAWN.SpawnObject(textMenu);
 
-        float btn1_Y = windowHeight / 2 - 50;
-        float btn2_Y = windowHeight / 2 + 30;
-        float btn3_Y = windowHeight / 2 + 110;
+        roomField = new TextField(Vector2(windowWidth / 2 - 125, windowHeight / 2 - 120), Vector2(250, 45));
+        SPAWN.SpawnObject(roomField);
+
+        btnJoin = new Button(Vector2(windowWidth / 2 - 125, windowHeight / 2 - 60), Vector2(120, 45), sf::Color(100, 0, 100, 255), "", Button::ActionType::ChangeScene, "TicTacToe");
+        btnCreate = new Button(Vector2(windowWidth / 2 + 5, windowHeight / 2 - 60), Vector2(120, 45), sf::Color(0, 100, 100, 255), "", Button::ActionType::ChangeScene, "TicTacToe");
+
+        SPAWN.SpawnObject(btnJoin);
+        SPAWN.SpawnObject(btnCreate);
+
+        btnJoinText = new TextObject("UNIRSE");
+        btnJoinText->GetTransform()->position = Vector2(windowWidth / 2 - 107.0f, windowHeight / 2 - 52);
+        SPAWN.SpawnObject(btnJoinText);
+
+        btnCreateText = new TextObject("CREAR");
+        btnCreateText->GetTransform()->position = Vector2(windowWidth / 2 + 27.0f, windowHeight / 2 - 52);
+        SPAWN.SpawnObject(btnCreateText);
+
+        float btn1_Y = windowHeight / 2 + 20;
+        float btn2_Y = windowHeight / 2 + 80;
+        float btn3_Y = windowHeight / 2 + 160;
 
         float btn_X = windowWidth / 2 - 125.0f;
 
-        buttonSpaceInvaders = new Button(Vector2(btn_X, btn1_Y), Vector2(250, 50), sf::Color(255, 0, 255, 255), "", Button::ActionType::ChangeScene, "Space Invaders");
-        buttonAudio = new Button(Vector2(btn_X, btn2_Y), Vector2(250, 50), sf::Color(255, 0, 255, 255), "", Button::ActionType::ToggleAudio);
-        buttonExit = new Button(Vector2(btn_X, btn3_Y), Vector2(250, 50), sf::Color(255, 0, 255, 255), "", Button::ActionType::ExitGame);
+        buttonRanking = new Button(Vector2(btn_X, btn1_Y), Vector2(250, 45), sf::Color(255, 0, 255, 255), "", Button::ActionType::ChangeScene, "Ranking");
+        buttonAudio = new Button(Vector2(btn_X, btn2_Y), Vector2(250, 45), sf::Color(255, 0, 255, 255), "", Button::ActionType::ToggleAudio);
+        buttonExit = new Button(Vector2(btn_X, btn3_Y), Vector2(250, 45), sf::Color(255, 0, 255, 255), "", Button::ActionType::ExitGame);
 
-        SPAWN.SpawnObject(buttonSpaceInvaders);
+        SPAWN.SpawnObject(buttonRanking);
         SPAWN.SpawnObject(buttonAudio);
         SPAWN.SpawnObject(buttonExit);
 
-        buttonSpaceInvadersText = new TextObject("TIC TAC TOE");
-        buttonSpaceInvadersText->GetTransform()->position = Vector2(windowWidth / 2 - 80.0f, btn1_Y + 10);
-        SPAWN.SpawnObject(buttonSpaceInvadersText);
+        buttonRankingText = new TextObject("RANKING");
+        buttonRankingText->GetTransform()->position = Vector2(windowWidth / 2 - 50.0f, btn1_Y + 7);
+        SPAWN.SpawnObject(buttonRankingText);
 
         buttonAudioText = new TextObject("TOGGLE AUDIO");
-        buttonAudioText->GetTransform()->position = Vector2(windowWidth / 2 - 90.0f, btn2_Y + 10);
+        buttonAudioText->GetTransform()->position = Vector2(windowWidth / 2 - 90.0f, btn2_Y + 7);
         SPAWN.SpawnObject(buttonAudioText);
 
         buttonExitText = new TextObject("EXIT GAME");
-        buttonExitText->GetTransform()->position = Vector2(windowWidth / 2 - 71.0f, btn3_Y + 10);
+        buttonExitText->GetTransform()->position = Vector2(windowWidth / 2 - 70.0f, btn3_Y + 7);
         SPAWN.SpawnObject(buttonExitText);
     }
 
     ~MainMenu()
     {
-        if (buttonSpaceInvadersText) { buttonSpaceInvadersText->Destroy(); buttonSpaceInvadersText = nullptr; }
+        if (textMenu) { textMenu->Destroy(); textMenu = nullptr; }
+        if (btnJoinText) { btnJoinText->Destroy(); btnJoinText = nullptr; }
+        if (btnCreateText) { btnCreateText->Destroy(); btnCreateText = nullptr; }
+        if (buttonRankingText) { buttonRankingText->Destroy(); buttonRankingText = nullptr; }
         if (buttonAudioText) { buttonAudioText->Destroy(); buttonAudioText = nullptr; }
         if (buttonExitText) { buttonExitText->Destroy(); buttonExitText = nullptr; }
-        if (textMenu) { textMenu->Destroy(); textMenu = nullptr; }
     }
 
     void OnExit() override
@@ -77,6 +102,10 @@ public:
     void Update() override
     {
         Scene::Update();
+
+        if (roomField) {
+            SM.sharedData = roomField->GetContent();
+        }
     }
 
     void Render() override

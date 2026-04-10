@@ -13,11 +13,15 @@ class AudioManager
 private:
     std::unordered_map<std::string, sf::SoundBuffer*> _clips;
     std::unordered_map<std::string, sf::Music*> _songs;
-
-    // SFML 3.0: Usamos punteros porque no podemos crear un sf::Sound vacío
     std::vector<sf::Sound*> _channels;
 
     bool _muted = false;
+
+    // volume
+    float _musicVolume = 10.0f;
+    float _sfxVolume = 10.0f;
+
+    std::string _currentSongName = "";
 
     AudioManager() {}
 
@@ -73,20 +77,20 @@ public:
     {
         if (_muted || _clips.find(name) == _clips.end()) return;
 
-        // 1. Buscamos un canal que ya exista y haya terminado de sonar
         for (auto* channel : _channels) {
             if (channel->getStatus() == sf::Sound::Status::Stopped) {
                 channel->setBuffer(*_clips[name]);
                 channel->setLooping(repetitions == -1);
+                channel->setVolume(_sfxVolume);
                 channel->play();
                 return;
             }
         }
 
-        // 2. Si todos los canales están ocupados, creamos uno nuevo (Límite 32)
         if (_channels.size() < 32) {
             sf::Sound* newSound = new sf::Sound(*_clips[name]);
             newSound->setLooping(repetitions == -1);
+            newSound->setVolume(_sfxVolume);
             newSound->play();
             _channels.push_back(newSound);
         }
@@ -94,14 +98,51 @@ public:
 
     inline void PlaySong(std::string name)
     {
-        if (_muted || _songs.find(name) == _songs.end()) return;
+        if (_muted) return;
 
-        for (auto const& [songName, music] : _songs) {
-            music->stop();
+        // Auto-carga inteligente
+        if (_songs.find(name) == _songs.end()) {
+            LoadSong(name);
+            if (_songs.find(name) == _songs.end()) return;
         }
 
+        // --- ESCUDO DEFINITIVO ---
+        // Si ya estamos en esta canción, no hacemos nada de nada.
+        if (_currentSongName == name) {
+            // Si por algún motivo se paró sola, la volvemos a arrancar
+            if (_songs[name]->getStatus() != sf::Sound::Status::Playing) {
+                _songs[name]->play();
+            }
+            return;
+        }
+
+        // Si es una canción NUEVA, paramos la que estuviera sonando antes
+        if (_currentSongName != "" && _songs.find(_currentSongName) != _songs.end()) {
+            _songs[_currentSongName]->stop();
+        }
+
+        // Registramos la nueva canción y le damos al play
+        _currentSongName = name;
         _songs[name]->setLooping(true);
+        _songs[name]->setVolume(_musicVolume);
         _songs[name]->play();
+    }
+
+
+    inline void SetMusicVolume(float volume)
+    {
+        _musicVolume = volume;
+        for (auto const& [songName, music] : _songs) {
+            music->setVolume(_musicVolume);
+        }
+    }
+
+    inline void SetSFXVolume(float volume)
+    {
+        _sfxVolume = volume;
+        for (auto* channel : _channels) {
+            channel->setVolume(_sfxVolume);
+        }
     }
 
     inline void Mute()
