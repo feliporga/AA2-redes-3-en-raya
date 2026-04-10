@@ -20,23 +20,20 @@ LoginScene::LoginScene() : Scene() {
 }
 
 void LoginScene::OnEnter() {
-    // Música inicial
     AM.SetMusicVolume(10.0f);
     AM.PlaySong("menuMusic");
 
-    // --- TÍTULO ---
+    
     titleText = new TextObject("3 EN RAYA ONLINE");
     titleText->GetTransform()->position = Vector2(winW / 2 - 120.0f, winH / 2 - 200);
     titleText->SetColor(sf::Color::Yellow);
     SPAWN.SpawnObject(titleText);
 
-    // --- CAMPOS DE TEXTO ---
     userField = new TextField(Vector2(winW / 2 - 125, winH / 2 - 100), Vector2(250, 45));
     passField = new TextField(Vector2(winW / 2 - 125, winH / 2 - 20), Vector2(250, 45));
     SPAWN.SpawnObject(userField);
     SPAWN.SpawnObject(passField);
 
-    // ETIQUETAS (Para saber qué es cada caja)
     userLabel = new TextObject("NICKNAME:");
     userLabel->GetTransform()->position = Vector2(winW / 2 - 125, winH / 2 - 130);
     SPAWN.SpawnObject(userLabel);
@@ -45,8 +42,6 @@ void LoginScene::OnEnter() {
     passLabel->GetTransform()->position = Vector2(winW / 2 - 125, winH / 2 - 50);
     SPAWN.SpawnObject(passLabel);
 
-    // --- BOTONES ---
-    // Ambos botones de momento nos llevan al MainMenu para poder probar el flujo
     btnLogin = new Button(Vector2(winW / 2 - 125, winH / 2 + 60), Vector2(250, 45), sf::Color(0, 100, 200, 255), "", Button::ActionType::ChangeScene, "MainMenu");
     btnRegister = new Button(Vector2(winW / 2 - 125, winH / 2 + 120), Vector2(250, 45), sf::Color(0, 150, 0, 255), "", Button::ActionType::ChangeScene, "MainMenu");
 

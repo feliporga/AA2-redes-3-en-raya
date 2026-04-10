@@ -24,7 +24,7 @@ private:
     std::string targetScene;
     TextRenderer* textRenderer = nullptr;
 
-    bool prevLeftClick; // <-- NUEVA VARIABLE DE SEGURIDAD
+    bool prevLeftClick;
 
     int windowWidth = RM->WINDOW_WIDTH;
     int windowHeight = RM->WINDOW_HEIGHT;
@@ -43,8 +43,6 @@ public:
         textRenderer = new TextRenderer(transform, text);
         textRenderer->SetColor(sf::Color::White);
 
-        // MAGIA AQUÍ: Al nacer el botón, miramos si el ratón ya estaba pulsado
-        // Así evitamos que se pulse solo al cambiar de escena
         prevLeftClick = Input.GetLeftClick();
     }
 
@@ -62,7 +60,6 @@ public:
             mouseX >= transform->position.x && mouseX <= transform->position.x + size.x &&
             mouseY >= transform->position.y && mouseY <= transform->position.y + size.y;
 
-        // Solo se activa si es el MILISEGUNDO EXACTO en el que pulsas el botón
         if (isMouseOver && currentLeftClick && !prevLeftClick) {
             switch (actionType) {
             case ActionType::ChangeScene:
@@ -86,7 +83,6 @@ public:
             }
         }
 
-        // Guardamos el estado para el siguiente frame
         prevLeftClick = currentLeftClick;
     }
 

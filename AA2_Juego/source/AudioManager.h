@@ -100,28 +100,22 @@ public:
     {
         if (_muted) return;
 
-        // Auto-carga inteligente
         if (_songs.find(name) == _songs.end()) {
             LoadSong(name);
             if (_songs.find(name) == _songs.end()) return;
         }
 
-        // --- ESCUDO DEFINITIVO ---
-        // Si ya estamos en esta canci�n, no hacemos nada de nada.
         if (_currentSongName == name) {
-            // Si por alg�n motivo se par� sola, la volvemos a arrancar
             if (_songs[name]->getStatus() != sf::Sound::Status::Playing) {
                 _songs[name]->play();
             }
             return;
         }
 
-        // Si es una canci�n NUEVA, paramos la que estuviera sonando antes
         if (_currentSongName != "" && _songs.find(_currentSongName) != _songs.end()) {
             _songs[_currentSongName]->stop();
         }
 
-        // Registramos la nueva canci�n y le damos al play
         _currentSongName = name;
         _songs[name]->setLooping(true);
         _songs[name]->setVolume(_musicVolume);

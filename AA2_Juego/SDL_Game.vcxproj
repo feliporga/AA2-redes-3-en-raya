@@ -44,9 +44,7 @@
     <ClInclude Include="source\GameOverScene.h" />
     <ClInclude Include="source\AnimatedImageRenderer.h" />
     <ClInclude Include="source\AudioManager.h" />
-    <ClInclude Include="source\ConstantsManager.h" />
     <ClInclude Include="source\Game.h" />
-    <ClInclude Include="source\GameConstants.h" />
     <ClInclude Include="source\ImageObject.h" />
     <ClInclude Include="source\ImageRenderer.h" />
     <ClInclude Include="source\InputManager.h" />
@@ -58,7 +56,6 @@
     <ClInclude Include="source\Scene.h" />
     <ClInclude Include="source\SceneManager.h" />
     <ClInclude Include="source\Spawner.h" />
-    <ClInclude Include="source\SpriteMenu.h" />
     <ClInclude Include="source\TextObject.h" />
     <ClInclude Include="source\TextRenderer.h" />
     <ClInclude Include="source\TimeManager.h" />

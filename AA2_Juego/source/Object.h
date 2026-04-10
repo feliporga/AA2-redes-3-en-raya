@@ -42,7 +42,6 @@ public:
 	Transform* GetTransform() { return transform; }
 	Rigidbody* GetRigidbody() { return physics; }
 
-	//Don't do anything
 	bool IsPendingDestroy() { return isPendingDestroy; }
 	virtual void Destroy() {
 		isPendingDestroy = true;

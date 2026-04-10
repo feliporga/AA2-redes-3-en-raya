@@ -17,7 +17,6 @@ private:
     Button* btnLogin;
     Button* btnRegister;
 
-    // Textos auxiliares
     TextObject* userLabel;
     TextObject* passLabel;
     TextObject* btnLoginText;

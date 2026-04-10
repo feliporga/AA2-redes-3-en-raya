@@ -112,15 +112,6 @@
     <ClInclude Include="source\AnimatedImageRenderer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="source\SpriteMenu.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="source\ConstantsManager.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="source\GameConstants.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="source\GameOverScene.h">
       <Filter>Header Files</Filter>
     </ClInclude>
