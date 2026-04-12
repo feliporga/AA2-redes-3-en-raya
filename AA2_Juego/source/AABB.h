@@ -1,7 +1,7 @@
 #pragma once
 #include "Vector2.h"
 
-class AABB { //esto es un collider, solo se encarga de decir si choca con otros
+class AABB {
 protected:
 	Vector2 topLeft;
 	Vector2 size;
@@ -22,7 +22,6 @@ public:
 		return insideX && insideY;
 	}
 	bool CheckOverlappingAABB(const AABB* other) {
-		// a |= b --> a = a || b
 		bool intersectionX = false;
 		intersectionX |= topLeft.x >= other->topLeft.x && topLeft.x <= other->topLeft.x + other->size.x;
 		intersectionX |= other->topLeft.x >= topLeft.x && other->topLeft.x <= topLeft.x + size.x;

@@ -4,13 +4,13 @@
 #include <SFML/Graphics.hpp>
 #include <cassert>
 
-#define FONT_PATH "resources/Fonts/PixelPowerline-9xOK.ttf"
+#define FONT_PATH "resources/Fonts/PokemonClassic.ttf"
 
 class TextRenderer : public Renderer
 {
 protected:
     std::string textString;
-    sf::Text* sfText = nullptr; // Lo hacemos puntero como el Sprite
+    sf::Text* sfText = nullptr;
 
 public:
     TextRenderer(Transform* transform, std::string _text) : Renderer(transform, FONT_PATH)

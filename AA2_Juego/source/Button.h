@@ -13,7 +13,8 @@ public:
         ChangeScene,
         ToggleAudio,
         SpritesChange,
-        ExitGame
+        ExitGame,
+        None
     };
 
 private:
@@ -67,6 +68,7 @@ public:
                 break;
             case ActionType::ToggleAudio:
             {
+                // Handle music state
                 if (AM.GetMuted()) {
                     AM.UnMute();
                     AM.PlaySong("menuMusic");
@@ -79,6 +81,9 @@ public:
             }
             case ActionType::ExitGame:
                 SceneManager::Instance().ExitGame();
+                break;
+            case ActionType::None:
+                // Do nothing, handled manually in the scene Update
                 break;
             }
         }

@@ -3,6 +3,8 @@
 #include "RenderManager.h"
 #include "Spawner.h"
 #include "AudioManager.h"
+#include "NetworkManager.h"
+#include "InputManager.h"
 
 LoginScene::LoginScene() : Scene() {
     winW = RM->WINDOW_WIDTH;
@@ -21,39 +23,41 @@ LoginScene::LoginScene() : Scene() {
 
 void LoginScene::OnEnter() {
     AM.SetMusicVolume(10.0f);
-    AM.PlaySong("menuMusic");
+    //AM.PlaySong("menuMusic");
 
-    
     titleText = new TextObject("3 EN RAYA ONLINE");
-    titleText->GetTransform()->position = Vector2(winW / 2 - 120.0f, winH / 2 - 200);
+    titleText->GetTransform()->position = Vector2(winW / 2 - 190.0f, winH / 2 - 200);
     titleText->SetColor(sf::Color::Yellow);
     SPAWN.SpawnObject(titleText);
 
-    userField = new TextField(Vector2(winW / 2 - 125, winH / 2 - 100), Vector2(250, 45));
-    passField = new TextField(Vector2(winW / 2 - 125, winH / 2 - 20), Vector2(250, 45));
+    // input fields setup
+    userField = new TextField(Vector2(winW / 2 - 200, winH / 2 - 100), Vector2(400, 45));
+    passField = new TextField(Vector2(winW / 2 - 200, winH / 2 - 20), Vector2(400, 45));
     SPAWN.SpawnObject(userField);
     SPAWN.SpawnObject(passField);
 
     userLabel = new TextObject("NICKNAME:");
-    userLabel->GetTransform()->position = Vector2(winW / 2 - 125, winH / 2 - 130);
+    userLabel->GetTransform()->position = Vector2(winW / 2 - 115, winH / 2 - 130);
     SPAWN.SpawnObject(userLabel);
 
     passLabel = new TextObject("PASSWORD:");
-    passLabel->GetTransform()->position = Vector2(winW / 2 - 125, winH / 2 - 50);
+    passLabel->GetTransform()->position = Vector2(winW / 2 - 115, winH / 2 - 50);
     SPAWN.SpawnObject(passLabel);
 
-    btnLogin = new Button(Vector2(winW / 2 - 125, winH / 2 + 60), Vector2(250, 45), sf::Color(0, 100, 200, 255), "", Button::ActionType::ChangeScene, "MainMenu");
-    btnRegister = new Button(Vector2(winW / 2 - 125, winH / 2 + 120), Vector2(250, 45), sf::Color(0, 150, 0, 255), "", Button::ActionType::ChangeScene, "MainMenu");
+    // ActionType::None allows manual click handling in Update
+    btnLogin = new Button(Vector2(winW / 2 - 125, winH / 2 + 60), Vector2(250, 45), sf::Color(0, 100, 200, 255), "", Button::ActionType::None);
+    btnRegister = new Button(Vector2(winW / 2 - 125, winH / 2 + 120), Vector2(250, 45), sf::Color(0, 150, 0, 255), "", Button::ActionType::None);
 
     SPAWN.SpawnObject(btnLogin);
     SPAWN.SpawnObject(btnRegister);
 
+    // Visual labels for the buttons
     btnLoginText = new TextObject("LOGIN");
-    btnLoginText->GetTransform()->position = Vector2(winW / 2 - 40.0f, winH / 2 + 70);
+    btnLoginText->GetTransform()->position = Vector2(winW / 2 - 60.0f, winH / 2 + 70);
     SPAWN.SpawnObject(btnLoginText);
 
     btnRegisterText = new TextObject("REGISTRO");
-    btnRegisterText->GetTransform()->position = Vector2(winW / 2 - 60.0f, winH / 2 + 130);
+    btnRegisterText->GetTransform()->position = Vector2(winW / 2 - 100.0f, winH / 2 + 130);
     SPAWN.SpawnObject(btnRegisterText);
 }
 
@@ -63,6 +67,53 @@ void LoginScene::OnExit() {
 
 void LoginScene::Update() {
     Scene::Update();
+
+    // Mouse click edge detection
+    static bool prevLeftClick = false;
+    bool currentLeftClick = Input.GetLeftClick();
+
+    if (currentLeftClick && !prevLeftClick) {
+        float mouseX = (float)Input.GetMouseX();
+        float mouseY = (float)Input.GetMouseY();
+
+        float btnX = winW / 2 - 125;
+        float btnW = 250;
+        float btnH = 45;
+
+        // Login button hitbox and network request
+        float loginY = winH / 2 + 60;
+        if (mouseX >= btnX && mouseX <= btnX + btnW &&
+            mouseY >= loginY && mouseY <= loginY + btnH)
+        {
+            std::string user = userField->GetText();
+            std::string pass = passField->GetText();
+
+            if (user != "" && pass != "") {
+                NM.SendLogin(user, pass);
+            }
+            else {
+                std::cout << "[CLIENTE] Por favor, rellena usuario y contrasena." << std::endl;
+            }
+        }
+
+        // Register button hitbox and network request
+        float regY = winH / 2 + 120;
+        if (mouseX >= btnX && mouseX <= btnX + btnW &&
+            mouseY >= regY && mouseY <= regY + btnH)
+        {
+            std::string user = userField->GetText();
+            std::string pass = passField->GetText();
+
+            if (user != "" && pass != "") {
+                NM.SendRegister(user, pass);
+            }
+            else {
+                std::cout << "[CLIENTE] Por favor, rellena usuario y contrasena para registrarte." << std::endl;
+            }
+        }
+    }
+
+    prevLeftClick = currentLeftClick;
 }
 
 void LoginScene::Render() {

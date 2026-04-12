@@ -33,58 +33,60 @@ private:
 
 public:
     void OnEnter() override {
-        AM.PlaySong("menuMusic");
+        //AM.PlaySong("menuMusic");
 
         textMenu = new TextObject("3 EN RAYA ONLINE");
-        textMenu->GetTransform()->position = Vector2(windowWidth / 2 - 110.0f, windowHeight / 2 - 180);
+        textMenu->GetTransform()->position = Vector2(windowWidth / 2 - 160.0f, windowHeight / 2 - 180);
         SPAWN.SpawnObject(textMenu);
 
         roomField = new TextField(Vector2(windowWidth / 2 - 125, windowHeight / 2 - 120), Vector2(250, 45));
         SPAWN.SpawnObject(roomField);
 
-        btnJoin = new Button(Vector2(windowWidth / 2 - 125, windowHeight / 2 - 60), Vector2(120, 45), sf::Color(100, 0, 100, 255), "", Button::ActionType::ChangeScene, "TicTacToe");
-        btnCreate = new Button(Vector2(windowWidth / 2 + 5, windowHeight / 2 - 60), Vector2(120, 45), sf::Color(0, 100, 100, 255), "", Button::ActionType::ChangeScene, "TicTacToe");
+        // Horizontal layout for Join/Create buttons
+        btnJoin = new Button(Vector2(windowWidth / 2 - 250, windowHeight / 2 - 60), Vector2(200, 45), sf::Color(100, 0, 100, 255), "", Button::ActionType::ChangeScene, "TicTacToe");
+        btnCreate = new Button(Vector2(windowWidth / 2 + 50, windowHeight / 2 - 60), Vector2(200, 45), sf::Color(0, 100, 100, 255), "", Button::ActionType::ChangeScene, "TicTacToe");
 
         SPAWN.SpawnObject(btnJoin);
         SPAWN.SpawnObject(btnCreate);
 
         btnJoinText = new TextObject("UNIRSE");
-        btnJoinText->GetTransform()->position = Vector2(windowWidth / 2 - 107.0f, windowHeight / 2 - 52);
+        btnJoinText->GetTransform()->position = Vector2(windowWidth / 2 - 225.0f, windowHeight / 2 - 52);
         SPAWN.SpawnObject(btnJoinText);
 
         btnCreateText = new TextObject("CREAR");
-        btnCreateText->GetTransform()->position = Vector2(windowWidth / 2 + 27.0f, windowHeight / 2 - 52);
+        btnCreateText->GetTransform()->position = Vector2(windowWidth / 2 + 85.0f, windowHeight / 2 - 52);
         SPAWN.SpawnObject(btnCreateText);
 
         float btn1_Y = windowHeight / 2 + 20;
         float btn2_Y = windowHeight / 2 + 80;
         float btn3_Y = windowHeight / 2 + 160;
 
-        float btn_X = windowWidth / 2 - 125.0f;
+        float btn_X = windowWidth / 2 - 200;
 
-        buttonRanking = new Button(Vector2(btn_X, btn1_Y), Vector2(250, 45), sf::Color(255, 0, 255, 255), "", Button::ActionType::ChangeScene, "Ranking");
-        buttonAudio = new Button(Vector2(btn_X, btn2_Y), Vector2(250, 45), sf::Color(255, 0, 255, 255), "", Button::ActionType::ToggleAudio);
-        buttonExit = new Button(Vector2(btn_X, btn3_Y), Vector2(250, 45), sf::Color(255, 0, 255, 255), "", Button::ActionType::ExitGame);
+        buttonRanking = new Button(Vector2(btn_X, btn1_Y), Vector2(400, 45), sf::Color(0, 100, 200, 255), "", Button::ActionType::ChangeScene, "Ranking");
+        buttonAudio = new Button(Vector2(btn_X, btn2_Y), Vector2(400, 45), sf::Color(0, 100, 200, 255), "", Button::ActionType::ToggleAudio);
+        buttonExit = new Button(Vector2(btn_X, btn3_Y), Vector2(400, 45), sf::Color(0, 100, 200, 255), "", Button::ActionType::ExitGame);
 
         SPAWN.SpawnObject(buttonRanking);
         SPAWN.SpawnObject(buttonAudio);
         SPAWN.SpawnObject(buttonExit);
 
         buttonRankingText = new TextObject("RANKING");
-        buttonRankingText->GetTransform()->position = Vector2(windowWidth / 2 - 50.0f, btn1_Y + 7);
+        buttonRankingText->GetTransform()->position = Vector2(windowWidth / 2 - 85.0f, btn1_Y + 7);
         SPAWN.SpawnObject(buttonRankingText);
 
-        buttonAudioText = new TextObject("TOGGLE AUDIO");
-        buttonAudioText->GetTransform()->position = Vector2(windowWidth / 2 - 90.0f, btn2_Y + 7);
+        buttonAudioText = new TextObject("AUDIO ON/OFF");
+        buttonAudioText->GetTransform()->position = Vector2(windowWidth / 2 - 140.0f, btn2_Y + 7);
         SPAWN.SpawnObject(buttonAudioText);
 
         buttonExitText = new TextObject("EXIT GAME");
-        buttonExitText->GetTransform()->position = Vector2(windowWidth / 2 - 70.0f, btn3_Y + 7);
+        buttonExitText->GetTransform()->position = Vector2(windowWidth / 2 - 105.0f, btn3_Y + 7);
         SPAWN.SpawnObject(buttonExitText);
     }
 
     ~MainMenu()
     {
+        // Manual cleanup for objects
         if (textMenu) { textMenu->Destroy(); textMenu = nullptr; }
         if (btnJoinText) { btnJoinText->Destroy(); btnJoinText = nullptr; }
         if (btnCreateText) { btnCreateText->Destroy(); btnCreateText = nullptr; }
@@ -103,6 +105,7 @@ public:
     {
         Scene::Update();
 
+        // Sync room code field with shared data for the next scene
         if (roomField) {
             SM.sharedData = roomField->GetContent();
         }
