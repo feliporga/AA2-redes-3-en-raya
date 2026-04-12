@@ -70,7 +70,7 @@ void RankingScene::OnEnter() {
     CreateDummyRow(320.0f, "3. Alex", "25", "20", "1250");
     CreateDummyRow(370.0f, "4. NoobMaster", "2", "50", "400");
 
-    backButton = new Button(Vector2(50, 50), Vector2(150, 50), sf::Color(255, 0, 255, 255), "", Button::ActionType::ChangeScene, "MainMenu");
+    backButton = new Button(Vector2(50, 50), Vector2(210, 50), sf::Color(0, 100, 200, 255), "", Button::ActionType::ChangeScene, "MainMenu");
     SPAWN.SpawnObject(backButton);
 
     backButtonText = new TextObject("VOLVER");

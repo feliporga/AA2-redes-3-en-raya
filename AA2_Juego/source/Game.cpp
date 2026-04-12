@@ -1,3 +1,4 @@
+#include "NetworkManager.h"
 #include "Game.h"
 #include "RenderManager.h"
 #include "SceneManager.h"
@@ -8,32 +9,13 @@
 #include "YouWonScene.h"
 #include "RankingScene.h"
 #include "GameOverScene.h"
-#include <cassert>2
 
 
 void Game::Init() {
+    NM.ConnectToServer("127.0.0.1", 53000);
     RM->Init();
 
-    RM->LoadTexture("resources/background1.png");
-
-    RM->LoadTexture("resources/enemy.png");
-    RM->LoadTexture("resources/PlayerSpace.png");
-    RM->LoadTexture("resources/bullet.png");
-
-    AM.LoadClip("laser");
-    AM.LoadClip("squirt");
-    AM.LoadClip("bulletshot");
-    AM.LoadClip("explosionBug");
-    AM.LoadClip("explosionLaser");
-    AM.LoadClip("explosionShoot");
-    AM.LoadClip("die");
-    AM.LoadClip("GameOver");
-
     AM.LoadSong("menuMusic");
-    AM.LoadSong("spaceMusic");
-
-    AM.LoadSong("menuMusic");
-    AM.LoadSong("spaceMusic");
 
     SM.AddScene("Login", new LoginScene());
     SM.AddScene("MainMenu", new MainMenu());
@@ -43,11 +25,11 @@ void Game::Init() {
     SM.AddScene("Ranking", new RankingScene());
 
     SM.InitFirstScene("Login");
-
 }
 
 void Game::Update()
 {
+    NM.Listen();
     SM.UpdateCurrentScene();
 }
 
