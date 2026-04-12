@@ -28,6 +28,20 @@ private:
     std::string dbPass = "enti";
     std::string dbName = "tictactoe_db";
 
+    // Estructura para una sala de 3 en Raya
+    struct Room {
+        std::string name;
+        sf::TcpSocket* player1 = nullptr;
+        sf::TcpSocket* player2 = nullptr;
+    };
+
+    // Lista de salas activas
+    std::vector<Room> activeRooms;
+
+    // Métodos para gestionar salas
+    void HandleCreateRoom(sf::TcpSocket* client, const std::string& roomName);
+    void HandleJoinRoom(sf::TcpSocket* client, const std::string& roomName);
+
     bool ConnectDatabase();
     void DisconnectDatabase();
     bool CheckUserLogin(const std::string& user, const std::string& password);

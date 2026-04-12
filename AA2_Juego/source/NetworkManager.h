@@ -104,7 +104,29 @@ public:
                 newRankingAvailable = true; // ¡Avisamos a la escena de que ya están listos!
                 break;
                 }
+            case PacketType::RoomSuccess:
+                std::cout << "[CLIENTE] Operacion de sala correcta. Esperando jugadores..." << std::endl;
+                break;
+            case PacketType::RoomError:
+                std::cout << "[CLIENTE] Error: La sala ya existe, esta llena o no se encontro." << std::endl;
+                break;
+            case PacketType::GameStart:
+            {
+                bool isMyTurn;
+                std::string opponentName;
+                packet >> isMyTurn >> opponentName;
+
+                std::cout << "\n=====================================" << std::endl;
+                std::cout << "  PARTIDA ENCONTRADA! VS " << opponentName << std::endl;
+                std::cout << "  Tu turno inicial: " << (isMyTurn ? "SI" : "NO") << std::endl;
+                std::cout << "=====================================\n" << std::endl;
+
+                // IMPORTANTE: Aquí cambiamos de escena automáticamente al empezar la partida
+                SceneManager::Instance().SetNextScene("TicTacToe");
+                break;
             }
+            }
+
         }
     }
 
@@ -127,5 +149,25 @@ public:
         sf::Packet packet;
         packet << static_cast<int>(PacketType::RankingRequest);
         (void)socket.send(packet);
+    }
+
+    void SendCreateRoom(const std::string& roomName) {
+        if (!isConnected) return;
+        sf::Packet packet;
+        packet << static_cast<int>(PacketType::CreateRoomRequest) << roomName;
+
+        if (socket.send(packet) == sf::Socket::Status::Done) {
+            std::cout << "[CLIENTE] Peticion para CREAR sala '" << roomName << "' enviada." << std::endl;
+        }
+    }
+
+    void SendJoinRoom(const std::string& roomName) {
+        if (!isConnected) return;
+        sf::Packet packet;
+        packet << static_cast<int>(PacketType::JoinRoomRequest) << roomName;
+
+        if (socket.send(packet) == sf::Socket::Status::Done) {
+            std::cout << "[CLIENTE] Peticion para UNIRSE a sala '" << roomName << "' enviada." << std::endl;
+        }
     }
 };

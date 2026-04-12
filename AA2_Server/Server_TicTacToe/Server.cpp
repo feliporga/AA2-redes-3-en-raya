@@ -199,6 +199,16 @@ void Server::HandleClientPackets() {
                         std::cout << "[SERVER] " << loggedInUsers[client] << " ha pedido el Ranking." << std::endl;
                         SendRankingToClient(client);
                     }
+                    else if (type == PacketType::CreateRoomRequest) {
+                        std::string roomName;
+                        packet >> roomName;
+                        HandleCreateRoom(client, roomName);
+                    }
+                    else if (type == PacketType::JoinRoomRequest) {
+                        std::string roomName;
+                        packet >> roomName;
+                        HandleJoinRoom(client, roomName);
+                    }
                 }
                 ++it;
             }
@@ -294,4 +304,71 @@ void Server::Stop() {
     clients.clear();
     DisconnectDatabase();
     std::cout << "[SERVER] Servidor apagado." << std::endl;
+}
+
+void Server::HandleCreateRoom(sf::TcpSocket* client, const std::string& roomName) {
+    // 1. Comprobar si la sala ya existe
+    for (const auto& room : activeRooms) {
+        if (room.name == roomName) {
+            sf::Packet response;
+            response << static_cast<int>(PacketType::RoomError); // Ya existe
+            (void)client->send(response);
+            return;
+        }
+    }
+
+    // 2. Si no existe, la creamos y metemos al jugador 1
+    Room newRoom;
+    newRoom.name = roomName;
+    newRoom.player1 = client;
+    activeRooms.push_back(newRoom);
+
+    std::cout << "[SERVER] Sala '" << roomName << "' creada por " << loggedInUsers[client] << std::endl;
+
+    sf::Packet response;
+    response << static_cast<int>(PacketType::RoomSuccess);
+    (void)client->send(response);
+}
+
+void Server::HandleJoinRoom(sf::TcpSocket* client, const std::string& roomName) {
+    // 1. Buscar la sala
+    for (auto& room : activeRooms) {
+        if (room.name == roomName) {
+            // 2. Ver si hay hueco
+            if (room.player2 == nullptr) {
+                room.player2 = client; // ¡Lo sentamos en la silla 2!
+                std::cout << "[SERVER] " << loggedInUsers[client] << " se ha unido a '" << roomName << "'" << std::endl;
+
+                // 3. Avisamos al Jugador 2 de que ha entrado bien
+                sf::Packet successResponse;
+                successResponse << static_cast<int>(PacketType::RoomSuccess);
+                (void)client->send(successResponse);
+
+                // 4. ¡AVISAMOS A LOS DOS DE QUE EMPIEZA LA PARTIDA!
+                // Al Player 1 le decimos que es su turno (true)
+                sf::Packet startP1;
+                startP1 << static_cast<int>(PacketType::GameStart) << true << loggedInUsers[room.player2];
+                (void)room.player1->send(startP1);
+
+                // Al Player 2 le decimos que NO es su turno (false)
+                sf::Packet startP2;
+                startP2 << static_cast<int>(PacketType::GameStart) << false << loggedInUsers[room.player1];
+                (void)room.player2->send(startP2);
+
+                return;
+            }
+            else {
+                // La sala está llena
+                sf::Packet response;
+                response << static_cast<int>(PacketType::RoomError);
+                (void)client->send(response);
+                return;
+            }
+        }
+    }
+
+    // Si llega aquí, es que la sala no existe
+    sf::Packet response;
+    response << static_cast<int>(PacketType::RoomError);
+    (void)client->send(response);
 }
