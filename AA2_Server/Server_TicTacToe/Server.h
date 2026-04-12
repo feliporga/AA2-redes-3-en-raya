@@ -19,6 +19,7 @@ private:
     sf::TcpListener listener;
     sf::SocketSelector selector;
     std::vector<sf::TcpSocket*> clients;
+    std::map<sf::TcpSocket*, std::string> loggedInUsers;
 
     sql::Driver* driver;
     sql::Connection* con;
@@ -34,6 +35,8 @@ private:
 
     void AcceptNewClient();
     void HandleClientPackets();
+
+    void SendRankingToClient(sf::TcpSocket* client);
 
 public:
     Server(unsigned short port);

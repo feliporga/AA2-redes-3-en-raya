@@ -35,7 +35,6 @@ public:
 
     virtual void Update() override {
         if (sfText) {
-            // SFML 3.0 requiere vectores entre llaves {}
             sfText->setPosition({ transform->position.x, transform->position.y });
             sfText->setScale({ transform->scale.x, transform->scale.y });
             sfText->setRotation(sf::degrees(transform->rotation));
@@ -55,7 +54,6 @@ public:
         sf::Font* font = RM->GetFont(FONT_PATH);
         if (font) {
             if (!sfText) {
-                // SFML 3.0: Lo creamos dándole la fuente, el texto y el tamaño de golpe
                 sfText = new sf::Text(*font, newText, 24);
             }
             else {

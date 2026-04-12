@@ -23,6 +23,17 @@ public:
         return instance;
     }
 
+    // Estructura para guardar los datos del ranking temporalmente
+    struct PlayerRecord {
+        int pos;
+        std::string name;
+        int pts;
+        int v;
+        int d;
+    };
+    std::vector<PlayerRecord> lastRanking;
+    bool newRankingAvailable = false;
+
     bool ConnectToServer(const std::string& ip, unsigned short port) {
         // Temporarily block to ensure connection is established before continuing
         socket.setBlocking(true);
@@ -79,6 +90,20 @@ public:
             case PacketType::RegisterFailed:
                 std::cout << "[CLIENTE] Error: El nombre de usuario ya existe." << std::endl;
                 break;
+            case PacketType::RankingResponse:
+                {
+                int numPlayers;
+                packet >> numPlayers;
+                lastRanking.clear(); // Limpiamos la lista vieja
+
+                for (int i = 0; i < numPlayers; i++) {
+                    PlayerRecord rec;
+                    packet >> rec.pos >> rec.name >> rec.pts >> rec.v >> rec.d;
+                    lastRanking.push_back(rec);
+                }
+                newRankingAvailable = true; // ¡Avisamos a la escena de que ya están listos!
+                break;
+                }
             }
         }
     }
@@ -95,5 +120,12 @@ public:
         if (socket.send(packet) == sf::Socket::Status::Done) {
             std::cout << "[CLIENTE] Peticion de Registro enviada." << std::endl;
         }
+    }
+
+    void RequestRanking() {
+        if (!isConnected) return;
+        sf::Packet packet;
+        packet << static_cast<int>(PacketType::RankingRequest);
+        (void)socket.send(packet);
     }
 };
