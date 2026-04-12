@@ -98,16 +98,16 @@ bool Server::RegisterUser(const std::string& user, const std::string& password) 
             return false;
         }
 
-        // --- PASO 2: INSERTAR CON BCRYPT --- //con ayuda de ia:
+        // INSERTAR CON BCRYPT //con ayuda de ia:
         std::cout << "[DEBUG] El usuario es nuevo. Generando Hash..." << std::endl;
 
-        // 1. Generamos el Hash de la contraseña 
+        // Generamos el Hash de la contraseña 
         std::string hashedPassword = bcrypt::generateHash(password);
 
         std::cout << "[DEBUG] Creando Statement para INSERT..." << std::endl;
         sql::Statement* insertStmt = con->createStatement();
 
-        // 2. Metemos el Hash en la base de datos, NUNCA la contraseña real
+        // Metemos el Hash en la base de datos
         std::string insertQuery = "INSERT INTO users (userName, password) VALUES ('" + user + "', '" + hashedPassword + "')";
 
         std::cout << "[DEBUG] Ejecutando INSERT..." << std::endl;
