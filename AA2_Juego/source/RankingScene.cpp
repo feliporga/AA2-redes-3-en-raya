@@ -2,6 +2,7 @@
 #include "SceneManager.h"
 #include "RenderManager.h"
 #include "Spawner.h"
+#include "NetworkManager.h"
 
 RankingScene::RankingScene() : Scene() {
     titleText = nullptr;
@@ -14,23 +15,29 @@ RankingScene::RankingScene() : Scene() {
 }
 
 void RankingScene::CreateDummyRow(float yOffset, std::string name, std::string wins, std::string losses, std::string elo) {
+    float winW = RM->WINDOW_WIDTH;
+
     TextObject* tName = new TextObject(name);
-    tName->GetTransform()->position = Vector2(300.0f, yOffset);
+    tName->GetTransform()->position = Vector2(winW * 0.15f, yOffset);
+    tName->SetColor(sf::Color::White);
     SPAWN.SpawnObject(tName);
     tableTexts.push_back(tName);
 
     TextObject* tWins = new TextObject(wins);
-    tWins->GetTransform()->position = Vector2(600.0f, yOffset);
+    tWins->GetTransform()->position = Vector2(winW * 0.45f, yOffset);
+    tWins->SetColor(sf::Color::White);
     SPAWN.SpawnObject(tWins);
     tableTexts.push_back(tWins);
 
     TextObject* tLosses = new TextObject(losses);
-    tLosses->GetTransform()->position = Vector2(800.0f, yOffset);
+    tLosses->GetTransform()->position = Vector2(winW * 0.65f, yOffset);
+    tLosses->SetColor(sf::Color::White);
     SPAWN.SpawnObject(tLosses);
     tableTexts.push_back(tLosses);
 
     TextObject* tElo = new TextObject(elo);
-    tElo->GetTransform()->position = Vector2(1000.0f, yOffset);
+    tElo->GetTransform()->position = Vector2(winW * 0.85f, yOffset);
+    tElo->SetColor(sf::Color::White);
     SPAWN.SpawnObject(tElo);
     tableTexts.push_back(tElo);
 }
@@ -46,29 +53,24 @@ void RankingScene::OnEnter() {
     float headerY = 150.0f;
 
     headerName = new TextObject("NOMBRE");
-    headerName->GetTransform()->position = Vector2(300.0f, headerY);
+    headerName->GetTransform()->position = Vector2(winW * 0.15f, headerY);
     headerName->SetColor(sf::Color(200, 200, 200, 255));
     SPAWN.SpawnObject(headerName);
 
     headerWins = new TextObject("VICTORIAS");
-    headerWins->GetTransform()->position = Vector2(600.0f, headerY);
+    headerWins->GetTransform()->position = Vector2(winW * 0.45f, headerY);
     headerWins->SetColor(sf::Color(200, 200, 200, 255));
     SPAWN.SpawnObject(headerWins);
 
     headerLosses = new TextObject("DERROTAS");
-    headerLosses->GetTransform()->position = Vector2(800.0f, headerY);
+    headerLosses->GetTransform()->position = Vector2(winW * 0.65f, headerY);
     headerLosses->SetColor(sf::Color(200, 200, 200, 255));
     SPAWN.SpawnObject(headerLosses);
 
     headerElo = new TextObject("ELO");
-    headerElo->GetTransform()->position = Vector2(1000.0f, headerY);
+    headerElo->GetTransform()->position = Vector2(winW * 0.85f, headerY);
     headerElo->SetColor(sf::Color(200, 200, 200, 255));
     SPAWN.SpawnObject(headerElo);
-
-    CreateDummyRow(220.0f, "1. Felipe", "42", "5", "1500");
-    CreateDummyRow(270.0f, "2. ProGamer", "38", "12", "1420");
-    CreateDummyRow(320.0f, "3. Alex", "25", "20", "1250");
-    CreateDummyRow(370.0f, "4. NoobMaster", "2", "50", "400");
 
     backButton = new Button(Vector2(50, 50), Vector2(210, 50), sf::Color(0, 100, 200, 255), "", Button::ActionType::ChangeScene, "MainMenu");
     SPAWN.SpawnObject(backButton);
@@ -76,6 +78,9 @@ void RankingScene::OnEnter() {
     backButtonText = new TextObject("VOLVER");
     backButtonText->GetTransform()->position = Vector2(75.0f, 60.0f);
     SPAWN.SpawnObject(backButtonText);
+
+    NM.newRankingAvailable = false;
+    NM.RequestRanking();
 }
 
 void RankingScene::OnExit() {
@@ -85,10 +90,28 @@ void RankingScene::OnExit() {
 
 void RankingScene::Update() {
     Scene::Update();
+
+    if (NM.newRankingAvailable) {
+        float startY = 220.0f;
+
+        for (const auto& player : NM.lastRanking) {
+            std::string displayName = std::to_string(player.pos) + ". " + player.name;
+
+            if (player.pos > 10) {
+                startY += 20.0f;
+            }
+
+            CreateDummyRow(startY, displayName, std::to_string(player.v), std::to_string(player.d), std::to_string(player.pts));
+            startY += 50.0f;
+        }
+
+        NM.newRankingAvailable = false;
+    }
 }
 
 void RankingScene::Render() {
     Scene::Render();
 
-    RM->DrawRect(280, 190, 800, 2, 255, 255, 255, 255);
+    float winW = RM->WINDOW_WIDTH;
+    RM->DrawRect((int)(winW * 0.15f), 190, (int)(winW * 0.80f), 2, 255, 255, 255, 255);
 }

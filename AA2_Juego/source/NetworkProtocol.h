@@ -6,5 +6,7 @@ enum class PacketType {
     LoginFailed,
     RegisterRequest,
     RegisterSuccess,
-    RegisterFailed
+    RegisterFailed,
+    RankingRequest,
+    RankingResponse
 };

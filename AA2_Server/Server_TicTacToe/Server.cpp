@@ -168,6 +168,7 @@ void Server::HandleClientPackets() {
                         sf::Packet response;
                         if (isValid) {
                             std::cout << "[SERVER] Login correcto." << std::endl;
+                            loggedInUsers[client] = user;
                             response << static_cast<int>(PacketType::LoginSuccess);
                         }
                         else {
@@ -194,6 +195,10 @@ void Server::HandleClientPackets() {
                         }
                         (void)client->send(response);
                     }
+                    else if (type == PacketType::RankingRequest) {
+                        std::cout << "[SERVER] " << loggedInUsers[client] << " ha pedido el Ranking." << std::endl;
+                        SendRankingToClient(client);
+                    }
                 }
                 ++it;
             }
@@ -211,6 +216,70 @@ void Server::HandleClientPackets() {
         else {
             ++it;
         }
+    }
+}
+
+void Server::SendRankingToClient(sf::TcpSocket* client) {
+    try {
+        std::string currentUser = loggedInUsers[client];
+        sql::Statement* stmt = con->createStatement();
+
+        // ranking top 10
+        std::string queryTop10 = "SELECT userName, points, wins, losses FROM users ORDER BY points DESC, wins DESC LIMIT 10";
+        sql::ResultSet* res = stmt->executeQuery(queryTop10);
+
+        sf::Packet response;
+        response << static_cast<int>(PacketType::RankingResponse);
+
+        struct PlayerData { int pos; std::string name; int pts; int v; int d; };
+        std::vector<PlayerData> ranking;
+
+        bool userInTop10 = false;
+        int currentPos = 1;
+
+        while (res->next()) {
+            std::string name = res->getString("userName");
+            int pts = res->getInt("points");
+            int v = res->getInt("wins");
+            int d = res->getInt("losses");
+
+            ranking.push_back({ currentPos, name, pts, v, d });
+            if (name == currentUser) userInTop10 = true;
+            currentPos++;
+        }
+        delete res;
+
+		// si no esta en el top 10, buscamos su posicion exacta
+        if (!userInTop10 && currentUser != "") {
+            std::string queryMyRank =
+                "SELECT points, wins, losses, "
+                "(SELECT COUNT(*) + 1 FROM users WHERE points > u.points) AS myPos "
+                "FROM users u WHERE userName = '" + currentUser + "'";
+
+            sql::ResultSet* resMe = stmt->executeQuery(queryMyRank);
+            if (resMe->next()) {
+                int myPos = resMe->getInt("myPos");
+                int pts = resMe->getInt("points");
+                int v = resMe->getInt("wins");
+                int d = resMe->getInt("losses");
+                ranking.push_back({ myPos, currentUser, pts, v, d });
+            }
+            delete resMe;
+        }
+        delete stmt;
+
+		// enviamos al cliente el ranking completo (top 10 + su posicion si no esta)
+        response << static_cast<int>(ranking.size());
+        for (const auto& p : ranking) {
+            response << p.pos << p.name << p.pts << p.v << p.d;
+        }
+
+        (void)client->send(response);
+        std::cout << "[SERVER] Ranking enviado a " << currentUser << std::endl;
+
+    }
+    catch (sql::SQLException& e) {
+        std::cout << "[BD] Error SQL enviando ranking: " << e.what() << std::endl;
     }
 }
 

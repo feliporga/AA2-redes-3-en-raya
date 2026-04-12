@@ -10,7 +10,7 @@ private:
     std::string content = "";
     Vector2 size;
     bool isFocused = false;
-    bool prevLeftClick = false; // Used for click edge detection
+    bool prevLeftClick = false;
 
     TextObject* visualText;
     sf::Color baseColor = sf::Color(50, 50, 50, 255);
@@ -35,7 +35,6 @@ public:
         float my = (float)Input.GetMouseY();
         bool currentClick = Input.GetLeftClick();
 
-        // Update focus state based on mouse bounds and click
         if (currentClick && !prevLeftClick) {
             isFocused = (mx >= transform->position.x && mx <= transform->position.x + size.x &&
                 my >= transform->position.y && my <= transform->position.y + size.y);
@@ -48,15 +47,13 @@ public:
             std::string buffer = Input.GetTextBuffer();
             bool textChanged = false;
 
-            // Process characters from the input buffer
             for (char c : buffer) {
-                if (c == '\b') { // Backspace handling
+                if (c == '\b') {
                     if (!content.empty()) {
                         content.pop_back();
                         textChanged = true;
                     }
                 }
-                // Filter: printable characters, 8-char limit, preserve case (allow lowercase and uppercase)
                 else if (c >= 33 && c <= 126 && content.length() < 8) {
                     content += c;
                     textChanged = true;
@@ -70,7 +67,6 @@ public:
             if (content == "") visualText->SetText("...");
         }
         else if (content == "") {
-            // Restore placeholder when focus is lost
             visualText->SetText("CODIGO...");
         }
 
@@ -78,7 +74,6 @@ public:
     }
 
     void Render() override {
-        // Draw background box with color feedback based on focus
         RM->DrawRect((int)transform->position.x, (int)transform->position.y,
             (int)size.x, (int)size.y,
             isFocused ? focusColor.r : baseColor.r,
