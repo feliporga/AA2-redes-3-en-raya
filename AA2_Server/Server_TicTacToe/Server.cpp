@@ -1,4 +1,5 @@
 #include "Server.h"
+#include "bcrypt.h"
 
 Server::Server(unsigned short port) : port(port), isRunning(false), driver(nullptr), con(nullptr) {
 }
@@ -34,13 +35,25 @@ bool Server::CheckUserLogin(const std::string& user, const std::string& password
     std::cout << "[DEBUG] Entrando a CheckUserLogin..." << std::endl;
     try {
         sql::Statement* stmt = con->createStatement();
-        std::string query = "SELECT * FROM users WHERE userName = '" + user + "' AND password = '" + password + "'";
+
+        //buscamos usuario por  nombre
+        std::string query = "SELECT password FROM users WHERE userName = '" + user + "'";
 
         std::cout << "[DEBUG] Ejecutando SELECT de Login..." << std::endl;
         sql::ResultSet* res = stmt->executeQuery(query);
 
         std::cout << "[DEBUG] Leyendo resultado del Login..." << std::endl;
-        bool loginSuccess = res->next();
+        bool loginSuccess = false;
+
+        // leemos su Hash de la base de datos
+        if (res->next()) {
+            std::string hashFromDB = res->getString("password");
+
+            //  BCrypt Compara la contraseña limpia que escribe el jugador con el Hash de la BD // ayuda de IA
+            if (bcrypt::validatePassword(password, hashFromDB)) {
+                loginSuccess = true; 
+            }
+        }
 
         delete res;
         delete stmt;
@@ -77,7 +90,6 @@ bool Server::RegisterUser(const std::string& user, const std::string& password) 
             count = res->getInt(1); // Leemos el número exacto
         }
 
-        // Al destruir aquí, como era un COUNT, el candado se libera 100% seguro
         delete res;
         delete checkStmt;
 
@@ -86,10 +98,17 @@ bool Server::RegisterUser(const std::string& user, const std::string& password) 
             return false;
         }
 
-        // --- PASO 2: INSERTAR ---
-        std::cout << "[DEBUG] El usuario es nuevo. Creando Statement para INSERT..." << std::endl;
+        // INSERTAR CON BCRYPT //con ayuda de ia:
+        std::cout << "[DEBUG] El usuario es nuevo. Generando Hash..." << std::endl;
+
+        // Generamos el Hash de la contraseña 
+        std::string hashedPassword = bcrypt::generateHash(password);
+
+        std::cout << "[DEBUG] Creando Statement para INSERT..." << std::endl;
         sql::Statement* insertStmt = con->createStatement();
-        std::string insertQuery = "INSERT INTO users (userName, password) VALUES ('" + user + "', '" + password + "')";
+
+        // Metemos el Hash en la base de datos
+        std::string insertQuery = "INSERT INTO users (userName, password) VALUES ('" + user + "', '" + hashedPassword + "')";
 
         std::cout << "[DEBUG] Ejecutando INSERT..." << std::endl;
         int rows = insertStmt->executeUpdate(insertQuery);
