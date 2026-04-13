@@ -115,7 +115,7 @@ void TicTacToe::OnEnter() {
     statusText->GetTransform()->position = Vector2(RM->WINDOW_WIDTH / 2 - 200, 30);
     SPAWN.SpawnObject(statusText);
 
-    backButton = new Button(Vector2(50, 50), Vector2(150, 50), sf::Color(255, 0, 255, 255), "", Button::ActionType::ChangeScene, "MainMenu");
+    backButton = new Button(Vector2(50, 50), Vector2(210, 50), sf::Color(255, 0, 255, 255), "", Button::ActionType::ChangeScene, "MainMenu");
     SPAWN.SpawnObject(backButton);
 
     backButtonText = new TextObject("VOLVER");
