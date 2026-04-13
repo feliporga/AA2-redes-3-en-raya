@@ -43,8 +43,8 @@ public:
         SPAWN.SpawnObject(roomField);
 
         // Horizontal layout for Join/Create buttons
-        btnJoin = new Button(Vector2(windowWidth / 2 - 250, windowHeight / 2 - 60), Vector2(200, 45), sf::Color(100, 0, 100, 255), "", Button::ActionType::ChangeScene, "TicTacToe");
-        btnCreate = new Button(Vector2(windowWidth / 2 + 50, windowHeight / 2 - 60), Vector2(200, 45), sf::Color(0, 100, 100, 255), "", Button::ActionType::ChangeScene, "TicTacToe");
+        btnJoin = new Button(Vector2(windowWidth / 2 - 250, windowHeight / 2 - 60), Vector2(200, 45), sf::Color(100, 0, 100, 255), "", Button::ActionType::None);
+        btnCreate = new Button(Vector2(windowWidth / 2 + 50, windowHeight / 2 - 60), Vector2(200, 45), sf::Color(0, 100, 100, 255), "", Button::ActionType::None);
 
         SPAWN.SpawnObject(btnJoin);
         SPAWN.SpawnObject(btnCreate);
@@ -105,10 +105,50 @@ public:
     {
         Scene::Update();
 
-        // Sync room code field with shared data for the next scene
+        // Mantenemos sincronizado el dato compartido
         if (roomField) {
             SM.sharedData = roomField->GetContent();
         }
+
+        // Lógica de clics
+        static bool prevLeftClick = false;
+        bool currentLeftClick = Input.GetLeftClick();
+
+        if (currentLeftClick && !prevLeftClick) {
+            float mouseX = (float)Input.GetMouseX();
+            float mouseY = (float)Input.GetMouseY();
+
+            std::string roomName = roomField->GetText();
+
+            // Clic en "UNIRSE"
+            float joinX = windowWidth / 2 - 250;
+            float joinY = windowHeight / 2 - 60;
+            if (mouseX >= joinX && mouseX <= joinX + 200 &&
+                mouseY >= joinY && mouseY <= joinY + 45)
+            {
+                if (roomName != "") {
+                    NM.SendJoinRoom(roomName);
+                }
+                else {
+                    std::cout << "[CLIENTE] Escribe un nombre de sala primero." << std::endl;
+                }
+            }
+
+            // Clic en "CREAR"
+            float createX = windowWidth / 2 + 50;
+            float createY = windowHeight / 2 - 60;
+            if (mouseX >= createX && mouseX <= createX + 200 &&
+                mouseY >= createY && mouseY <= createY + 45)
+            {
+                if (roomName != "") {
+                    NM.SendCreateRoom(roomName);
+                }
+                else {
+                    std::cout << "[CLIENTE] Escribe un nombre de sala primero." << std::endl;
+                }
+            }
+        }
+        prevLeftClick = currentLeftClick;
     }
 
     void Render() override
