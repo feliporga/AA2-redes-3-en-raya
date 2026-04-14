@@ -45,13 +45,16 @@ bool Server::CheckUserLogin(const std::string& user, const std::string& password
         std::cout << "[DEBUG] Leyendo resultado del Login..." << std::endl;
         bool loginSuccess = false;
 
-        // leemos su Hash de la base de datos
+        // Si el usuario existe, leemos su Hash (que ahora está sin la cabecera)
         if (res->next()) {
             std::string hashFromDB = res->getString("password");
 
-            //  BCrypt Compara la contraseña limpia que escribe el jugador con el Hash de la BD // ayuda de IA
-            if (bcrypt::validatePassword(password, hashFromDB)) {
-                loginSuccess = true; 
+            //  Reconstruimos el hash completo pegándole el "$2b$10$" manualmente por delante
+            std::string reconstructedHash = "$2b$10$" + hashFromDB;
+
+            // La magia de BCrypt: Compara la contraseña limpia con el Hash reconstruido
+            if (bcrypt::validatePassword(password, reconstructedHash)) {
+                loginSuccess = true; // ¡Coinciden! Le dejamos entrar
             }
         }
 
@@ -98,17 +101,21 @@ bool Server::RegisterUser(const std::string& user, const std::string& password) 
             return false;
         }
 
-        // INSERTAR CON BCRYPT //con ayuda de ia:
+        // --- PASO 2: INSERTAR CON BCRYPT (AL GUSTO DEL PROFE) ---
         std::cout << "[DEBUG] El usuario es nuevo. Generando Hash..." << std::endl;
 
-        // Generamos el Hash de la contraseña 
-        std::string hashedPassword = bcrypt::generateHash(password);
+        // 1. Generamos el Hash completo de la contraseña
+        std::string fullHash = bcrypt::generateHash(password);
+
+        // 2. Le cortamos los primeros 7 caracteres ("$2b$10$") para contentar al profe
+        // substr(7) coge todo el texto desde la posición 7 hasta el final.
+        std::string hashForDB = fullHash.substr(7);
 
         std::cout << "[DEBUG] Creando Statement para INSERT..." << std::endl;
         sql::Statement* insertStmt = con->createStatement();
 
-        // Metemos el Hash en la base de datos
-        std::string insertQuery = "INSERT INTO users (userName, password) VALUES ('" + user + "', '" + hashedPassword + "')";
+        // 3. Metemos el hash RECORTADO en la base de datos
+        std::string insertQuery = "INSERT INTO users (userName, password) VALUES ('" + user + "', '" + hashForDB + "')";
 
         std::cout << "[DEBUG] Ejecutando INSERT..." << std::endl;
         int rows = insertStmt->executeUpdate(insertQuery);
