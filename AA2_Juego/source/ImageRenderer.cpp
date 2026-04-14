@@ -7,7 +7,7 @@ ImageRenderer::ImageRenderer(Transform* transform, std::string resourcePath, Vec
     RM->LoadTexture(resourcePath);
     sf::Texture* tex = RM->GetTexture(resourcePath);
 
-    // SFML 3.0: Creamos el sprite pasándole la textura directamente en su nacimiento
+
     if (tex) {
         sprite = new sf::Sprite(*tex);
     }
@@ -41,6 +41,6 @@ void ImageRenderer::Update()
 void ImageRenderer::Render()
 {
     if (sprite && RM->GetWindow()) {
-        RM->GetWindow()->draw(*sprite); // Le pasamos el contenido del puntero (*)
+        RM->GetWindow()->draw(*sprite); // Le pasamos el contenido del puntero
     }
 }

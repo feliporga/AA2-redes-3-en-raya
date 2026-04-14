@@ -4,6 +4,7 @@
 #include <string>
 #include "NetworkProtocol.h"
 #include "SceneManager.h"
+#include "TicTacToe.h"
 
 #define NM NetworkManager::Instance()
 
@@ -18,6 +19,9 @@ private:
     }
 
 public:
+    bool nextGameMyTurn = false;
+    std::string nextGameOpponent = "";
+    int nextGamePlayerID = 1;
     static NetworkManager& Instance() {
         static NetworkManager instance;
         return instance;
@@ -101,7 +105,7 @@ public:
                     packet >> rec.pos >> rec.name >> rec.pts >> rec.v >> rec.d;
                     lastRanking.push_back(rec);
                 }
-                newRankingAvailable = true; // ¡Avisamos a la escena de que ya están listos!
+                newRankingAvailable = true; 
                 break;
                 }
             case PacketType::RoomSuccess:
@@ -110,7 +114,7 @@ public:
             case PacketType::RoomError:
                 std::cout << "[CLIENTE] Error: La sala ya existe, esta llena o no se encontro." << std::endl;
                 break;
-            case PacketType::GameStart:
+            /*case PacketType::GameStart:
             {
                 bool isMyTurn;
                 std::string opponentName;
@@ -124,7 +128,36 @@ public:
                 // IMPORTANTE: Aquí cambiamos de escena automáticamente al empezar la partida
                 SceneManager::Instance().SetNextScene("TicTacToe");
                 break;
+            }*/
+            case PacketType::GameStart:
+            {
+                bool myTurn;
+                std::string opponent;
+                packet >> myTurn >> opponent;
+
+                this->nextGameMyTurn = myTurn;
+                this->nextGameOpponent = opponent;
+                this->nextGamePlayerID = myTurn ? 1 : 2;
+
+                std::cout << "[CLIENTE] Empieza la partida contra " << opponent << ". Mi turno: " << (myTurn ? "SI" : "NO") << std::endl;
+
+                SceneManager::Instance().SetNextScene("TicTacToe");
+                break;
             }
+            case PacketType::UpdateBoard:
+            {
+                int r, c, playerID;
+                bool nextTurnIsMine;
+                packet >> r >> c >> playerID >> nextTurnIsMine;
+
+                // Buscamos la escena actual y aplicamos el movimiento
+                TicTacToe* gameScene = dynamic_cast<TicTacToe*>(SceneManager::Instance().GetCurrentScene());
+                if (gameScene) {
+                    gameScene->ApplyMoveFromServer(r, c, playerID, nextTurnIsMine);
+                }
+                break;
+            }
+
             }
 
         }
@@ -169,5 +202,13 @@ public:
         if (socket.send(packet) == sf::Socket::Status::Done) {
             std::cout << "[CLIENTE] Peticion para UNIRSE a sala '" << roomName << "' enviada." << std::endl;
         }
+    }
+
+    void SendGameMove(int row, int col) {
+        if (!isConnected) return;
+        std::cout << "[CLIENTE] Pieza clickada en fila " << row << "y columna " << col << std::endl;
+        sf::Packet packet;
+        packet << static_cast<int>(PacketType::GameMove) << row << col;
+        (void)socket.send(packet);
     }
 };

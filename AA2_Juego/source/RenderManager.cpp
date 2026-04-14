@@ -6,7 +6,6 @@ void RenderManager::Init()
 {
     try {
         CreateWindow();
-        // Puedes cambiar el fondo inicial por el del 3 en raya cuando lo tengas
         // SetBackground("resources/background1.png"); 
     }
     catch (std::exception& exception)
@@ -99,16 +98,14 @@ RenderManager::~RenderManager()
 
 void RenderManager::CreateWindow()
 {
-    // SFML 3.0: Agrupamos las variables entre llaves para formar un vector
     window = new sf::RenderWindow(sf::VideoMode({ WINDOW_WIDTH, WINDOW_HEIGHT }), "3 en Raya Online");
     window->setFramerateLimit(60);
 }
 
 void RenderManager::DrawRect(int x, int y, int w, int h, std::uint8_t r, std::uint8_t g, std::uint8_t b, std::uint8_t a)
 {
-    // SFML usa una clase sf::RectangleShape para dibujar primitivas
     sf::RectangleShape rect(sf::Vector2f((float)w, (float)h));
-    rect.setPosition({ (float)x, (float)y }); // SFML 3.0 usa {} para vectores
+    rect.setPosition({ (float)x, (float)y }); 
     rect.setFillColor(sf::Color(r, g, b, a));
 
     if (window) {

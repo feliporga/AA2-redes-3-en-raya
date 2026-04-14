@@ -227,6 +227,13 @@ void Server::HandleClientPackets() {
                         std::string roomName;
                         packet >> roomName;
                         HandleJoinRoom(client, roomName);
+                    } 
+                    else if (type == PacketType::GameMove) {
+                        int row = 0;
+                        int col = 0;
+                        packet >> row >> col;
+                        std::cout << "[SERVER] " << loggedInUsers[client] << " ha intentado mover en Fila: " << row << ", Columna: " << col << std::endl;
+                        HandleGameMove(client, row, col);
                     }
                 }
                 ++it;
@@ -390,4 +397,39 @@ void Server::HandleJoinRoom(sf::TcpSocket* client, const std::string& roomName) 
     sf::Packet response;
     response << static_cast<int>(PacketType::RoomError);
     (void)client->send(response);
+}
+
+void Server::HandleGameMove(sf::TcpSocket* client, int row, int col) {
+    // Buscamos en qué sala está este cliente
+    for (auto& room : activeRooms) {
+        if (room.player1 == client || room.player2 == client) {
+
+            int playerID = (room.player1 == client) ? 1 : 2;
+
+            // 1. Validar que sea su turno
+            if (room.currentTurn != playerID) return;
+
+            // 2. Validar que la casilla esté vacía
+            if (room.board[row][col] != 0) return;
+
+            // 3. Aplicar el movimiento en el servidor
+            room.board[row][col] = playerID;
+
+            // 4. Cambiar el turno
+            room.currentTurn = (playerID == 1) ? 2 : 1;
+
+            // 5. Avisar a AMBOS jugadores del movimiento y de quién le toca ahora
+            sf::Packet p1Packet, p2Packet;
+
+            // Para el Player 1: ¿Es su turno ahora? (true si currentTurn == 1)
+            p1Packet << static_cast<int>(PacketType::UpdateBoard) << row << col << playerID << (room.currentTurn == 1);
+            // Para el Player 2: ¿Es su turno ahora? (true si currentTurn == 2)
+            p2Packet << static_cast<int>(PacketType::UpdateBoard) << row << col << playerID << (room.currentTurn == 2);
+
+            (void)room.player1->send(p1Packet);
+            (void)room.player2->send(p2Packet);
+
+            return;
+        }
+    }
 }

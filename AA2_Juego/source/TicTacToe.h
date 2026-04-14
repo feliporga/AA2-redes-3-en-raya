@@ -35,4 +35,10 @@ public:
     void OnExit() override;
     void Update() override;
     void Render() override;
+
+    bool isMyTurn = false;
+    int myPlayerID = 1;
+    std::string opponentName = "";
+
+    void ApplyMoveFromServer(int row, int col, int playerMoved, bool nextTurnIsMine);
 };

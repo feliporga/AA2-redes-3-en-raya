@@ -1,6 +1,7 @@
 #include "TicTacToe.h"
 #include "InputManager.h"
 #include "RenderManager.h"
+#include "NetworkManager.h"
 #include "Spawner.h"
 
 TicTacToe::TicTacToe() : Scene() {
@@ -57,14 +58,17 @@ void TicTacToe::HandleInput() {
     if (isLeftClick && !mouseHeld) {
         mouseHeld = true;
 
-        float mx = (float)Input.GetMouseX();
-        float my = (float)Input.GetMouseY();
+        float mouseX = (float)Input.GetMouseX();
+        float mouseY = (float)Input.GetMouseY();
 
-        if (mx >= startX && mx <= startX + 600 && my >= startY && my <= startY + 600) {
-            int col = (int)((mx - startX) / cellSize);
-            int row = (int)((my - startY) / cellSize);
+        if (mouseX >= startX && mouseX <= startX + 600 && mouseY >= startY && mouseY <= startY + 600) {
+            int col = (int)((mouseX - startX) / cellSize);
+            int row = (int)((mouseY - startY) / cellSize);
 
-            if (board[row][col] == 0) {
+            if (isMyTurn && board[row][col] == 0) {
+                NM.SendGameMove(row, col); 
+            }
+           /* if (board[row][col] == 0) {
                 board[row][col] = currentPlayer;
                 movesCount++;
 
@@ -88,7 +92,7 @@ void TicTacToe::HandleInput() {
                     if (currentPlayer > 4) currentPlayer = 1;
                     statusText->SetText("TURNO: " + GetPlayerName(currentPlayer));
                 }
-            }
+            }*/
         }
     }
     else if (!isLeftClick) {
@@ -96,7 +100,43 @@ void TicTacToe::HandleInput() {
     }
 }
 
+void TicTacToe::ApplyMoveFromServer(int row, int col, int playerWhoMoved, bool nextTurnIsMine) {
+    board[row][col] = playerWhoMoved;
+    movesCount++;
+
+    Vector2 pos(startX + col * cellSize, startY + row * cellSize);
+    PlayerPiece* newSprite = new PlayerPiece(playerWhoMoved, pos);
+
+    SPAWN.SpawnObject(newSprite);
+    cellSprites[row][col] = newSprite;
+
+    if (CheckWin(playerWhoMoved)) {
+        statusText->SetText(GetPlayerName(playerWhoMoved) + " GANA!");
+        statusText->SetColor(sf::Color::Yellow);
+        gameOver = true;
+    }
+    else if (movesCount >= 36) {
+        statusText->SetText("EMPATE!");
+        gameOver = true;
+    }
+    else {
+        isMyTurn = nextTurnIsMine;
+        if (isMyTurn) {
+            statusText->SetText("TU TURNO");
+            statusText->SetColor(sf::Color::Green);
+        }
+        else {
+            statusText->SetText("TURNO DE " + opponentName);
+            statusText->SetColor(sf::Color::Red);
+        }
+    }
+}
+
 void TicTacToe::OnEnter() {
+    isMyTurn = NM.nextGameMyTurn;
+    opponentName = NM.nextGameOpponent;
+    myPlayerID = NM.nextGamePlayerID;
+
     currentPlayer = 1;
     gameOver = false;
 
