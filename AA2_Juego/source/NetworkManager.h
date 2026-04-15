@@ -11,10 +11,11 @@
 class NetworkManager {
 private:
     sf::TcpSocket socket;
+    sf::TcpListener p2pListener;
+    std::vector<sf::TcpSocket*> p2pPeers;
     bool isConnected = false;
 
     NetworkManager() {
-        // Run in non-blocking mode to prevent the game from freezing while listening
         socket.setBlocking(false);
     }
 
@@ -27,6 +28,7 @@ public:
         return instance;
     }
 
+    bool isP2PHost = false;
     // Estructura para guardar los datos del ranking temporalmente
     struct PlayerRecord {
         int pos;
@@ -39,12 +41,10 @@ public:
     bool newRankingAvailable = false;
 
     bool ConnectToServer(const std::string& ip, unsigned short port) {
-        // Temporarily block to ensure connection is established before continuing
         socket.setBlocking(true);
 
         sf::Socket::Status status = socket.connect(sf::IpAddress::resolve(ip).value(), port, sf::seconds(2.0f));
 
-        // Revert to non-blocking for normal gameplay
         socket.setBlocking(false);
 
         if (status == sf::Socket::Status::Done) {
@@ -74,7 +74,7 @@ public:
         if (!isConnected) return;
 
         sf::Packet packet;
-        // Poll for incoming packets every frame without hanging the main loop
+       
         if (socket.receive(packet) == sf::Socket::Status::Done) {
             int typeInt;
             packet >> typeInt;
@@ -98,7 +98,7 @@ public:
                 {
                 int numPlayers;
                 packet >> numPlayers;
-                lastRanking.clear(); // Limpiamos la lista vieja
+                lastRanking.clear(); 
 
                 for (int i = 0; i < numPlayers; i++) {
                     PlayerRecord rec;
@@ -129,7 +129,7 @@ public:
                 SceneManager::Instance().SetNextScene("TicTacToe");
                 break;
             }*/
-            case PacketType::GameStart:
+            /*case PacketType::GameStart:
             {
                 bool myTurn;
                 std::string opponent;
@@ -143,6 +143,47 @@ public:
 
                 SceneManager::Instance().SetNextScene("TicTacToe");
                 break;
+            }*/
+
+            case PacketType::GameStart:
+            {
+                bool isHost;
+                std::string hostIP;
+                packet >> isHost >> hostIP;
+
+                this->isP2PHost = isHost;
+
+                socket.disconnect();
+                isConnected = false;
+                std::cout << "[CLIENTE] Desconectado del servidor principal (Bootstrap)." << std::endl;
+
+                //Iniciar P2P
+                if (isHost) {
+                    socket.setBlocking(false);
+                    if (p2pListener.listen(54000) == sf::Socket::Status::Done) {
+                        std::cout << "[P2P] Soy el HOST. Puertas abiertas en el puerto 54000." << std::endl;
+                    }
+                    else {
+                        std::cout << "[P2P] No se pudo abrir el puerto de Host." << std::endl;
+                    }
+                }
+                else {
+
+                    socket.setBlocking(true);
+                    sf::Socket::Status status = socket.connect(sf::IpAddress::resolve(hostIP).value(), 54000, sf::seconds(5.0f)); 
+                    //Linea de arriba generada por IA, debido a que petaba la IP del Host: linea original:
+                    //sf::Socket::Status status = socket.connect(hostIP, 54000, sf::seconds(5.0f));
+                    socket.setBlocking(false);
+
+                    if (status == sf::Socket::Status::Done) {
+                        std::cout << "[P2P] Conectado al HOST directamente con exito!" << std::endl;
+                        isConnected = true; 
+                    }
+                    else {
+                        std::cout << "[P2P ERROR] No se pudo conectar al Host en la IP: " << hostIP << std::endl;
+                    }
+                }
+
             }
             case PacketType::UpdateBoard:
             {

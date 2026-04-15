@@ -362,24 +362,31 @@ void Server::HandleJoinRoom(sf::TcpSocket* client, const std::string& roomName) 
         if (room.name == roomName) {
             // 2. Ver si hay hueco
             if (room.player2 == nullptr) {
-                room.player2 = client; // ¡Lo sentamos en la silla 2!
+                room.player2 = client;
                 std::cout << "[SERVER] " << loggedInUsers[client] << " se ha unido a '" << roomName << "'" << std::endl;
 
-                // 3. Avisamos al Jugador 2 de que ha entrado bien
                 sf::Packet successResponse;
                 successResponse << static_cast<int>(PacketType::RoomSuccess);
                 (void)client->send(successResponse);
 
-                // 4. ¡AVISAMOS A LOS DOS DE QUE EMPIEZA LA PARTIDA!
-                // Al Player 1 le decimos que es su turno (true)
+                // Obtenemos la IP pública/local del Jugador 1
+                std::string p1Address = room.player1->getRemoteAddress().value().toString();
+
                 sf::Packet startP1;
-                startP1 << static_cast<int>(PacketType::GameStart) << true << loggedInUsers[room.player2];
+                startP1 << static_cast<int>(PacketType::GameStart) << true << "127.0.0.1"; 
                 (void)room.player1->send(startP1);
 
-                // Al Player 2 le decimos que NO es su turno (false)
                 sf::Packet startP2;
-                startP2 << static_cast<int>(PacketType::GameStart) << false << loggedInUsers[room.player1];
+                startP2 << static_cast<int>(PacketType::GameStart) << false << p1Address;
                 (void)room.player2->send(startP2);
+
+                std::cout << "[SERVER] Partida iniciada. Desconectando clientes del Bootstrap..." << std::endl;
+
+                selector.remove(*room.player1);
+                selector.remove(*room.player2);
+
+                room.player1->disconnect();
+                room.player2->disconnect();
 
                 return;
             }
@@ -421,9 +428,7 @@ void Server::HandleGameMove(sf::TcpSocket* client, int row, int col) {
             // 5. Avisar a AMBOS jugadores del movimiento y de quién le toca ahora
             sf::Packet p1Packet, p2Packet;
 
-            // Para el Player 1: ¿Es su turno ahora? (true si currentTurn == 1)
             p1Packet << static_cast<int>(PacketType::UpdateBoard) << row << col << playerID << (room.currentTurn == 1);
-            // Para el Player 2: ¿Es su turno ahora? (true si currentTurn == 2)
             p2Packet << static_cast<int>(PacketType::UpdateBoard) << row << col << playerID << (room.currentTurn == 2);
 
             (void)room.player1->send(p1Packet);
