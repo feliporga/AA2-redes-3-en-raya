@@ -40,5 +40,6 @@ public:
     int myPlayerID = 1;
     std::string opponentName = "";
 
-    void ApplyMoveFromServer(int row, int col, int playerMoved, bool nextTurnIsMine);
+    void ApplyMoveFromServer(int row, int col, int playerMoved, int nextPlayerturn);
+    bool IsMyTurn(int nextPlayerTurn);
 };

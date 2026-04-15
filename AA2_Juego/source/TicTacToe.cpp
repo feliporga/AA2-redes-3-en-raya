@@ -99,8 +99,10 @@ void TicTacToe::HandleInput() {
         mouseHeld = false;
     }
 }
-
-void TicTacToe::ApplyMoveFromServer(int row, int col, int playerWhoMoved, bool nextTurnIsMine) {
+bool TicTacToe::IsMyTurn(int nextPlayerTurn) {
+    return myPlayerID == nextPlayerTurn;
+}
+void TicTacToe::ApplyMoveFromServer(int row, int col, int playerWhoMoved, int nextPlayerTurn) {
     board[row][col] = playerWhoMoved;
     movesCount++;
 
@@ -120,7 +122,8 @@ void TicTacToe::ApplyMoveFromServer(int row, int col, int playerWhoMoved, bool n
         gameOver = true;
     }
     else {
-        isMyTurn = nextTurnIsMine;
+        isMyTurn = IsMyTurn(nextPlayerTurn);
+
         if (isMyTurn) {
             statusText->SetText("TU TURNO");
             statusText->SetColor(sf::Color::Green);
