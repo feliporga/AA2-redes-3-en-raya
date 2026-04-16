@@ -44,7 +44,7 @@ private:
         sf::TcpSocket* player2 = nullptr; 
         
         int board[NUM_ROWS][NUM_COLS]; // Tablero de 6x6 vacío
-        int currentTurn = INITIAL_TURN;   // 1 = Player1 (X), 2 = Player2 (O)
+        int currentTurn = INITIAL_TURN;   
     };
 
     void HandleGameMove(sf::TcpSocket* client, int row, int col);

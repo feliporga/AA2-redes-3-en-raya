@@ -10,7 +10,7 @@
 #define NUM_ROWS 6
 #define NUM_COLS 6
 #define INITIAL_TURN 1
-#define PEER_PORT 54000
+#define PEER_PORT 55000
 class NetworkManager {
 private:
     sf::TcpSocket socket;
@@ -165,7 +165,7 @@ public:
                 //Iniciar P2P
                 if (isHost) {
                     p2pListener.setBlocking(true);
-                    if (p2pListener.listen(54000) == sf::Socket::Status::Done) {
+                    if (p2pListener.listen(PEER_PORT) == sf::Socket::Status::Done) {
                         std::cout << "[P2P] Esperando a que el peer se conecte" << std::endl;
                         // Aceptamos al P2P y metemos su conexión en socket
                         if (p2pListener.accept(socket) == sf::Socket::Status::Done) {
@@ -197,7 +197,7 @@ public:
                     socket.setBlocking(true);
                     sf::Socket::Status status = socket.connect(sf::IpAddress::resolve(hostIP).value(), PEER_PORT, sf::seconds(5.0f)); 
                     //Linea de arriba generada por IA, debido a que petaba la IP del Host: linea original:
-                    //sf::Socket::Status status = socket.connect(hostIP, 54000, sf::seconds(5.0f));
+                    //sf::Socket::Status status = socket.connect(hostIP, 55000, sf::seconds(5.0f));
 
                     socket.setBlocking(false);
 
