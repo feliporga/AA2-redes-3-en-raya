@@ -34,7 +34,6 @@ void Server::DisconnectDatabase() {
 bool Server::CheckUserLogin(const std::string& user, const std::string& password) {
     std::cout << "[DEBUG] Entrando a CheckUserLogin..." << std::endl;
     try {
-        // PREPARED STATEMENT
         sql::PreparedStatement* stmt = con->prepareStatement(
             "SELECT password FROM users WHERE userName = ?"
         );
@@ -75,7 +74,6 @@ bool Server::CheckUserLogin(const std::string& user, const std::string& password
 bool Server::RegisterUser(const std::string& user, const std::string& password) {
     std::cout << "[DEBUG] Entrando a RegisterUser..." << std::endl;
     try {
-        // --- PASO 1: COMPROBAR CON COUNT(*) ---
         std::cout << "[DEBUG] Creando Statement para SELECT COUNT..." << std::endl;
 
         sql::PreparedStatement* checkStmt = con->prepareStatement(
@@ -101,7 +99,7 @@ bool Server::RegisterUser(const std::string& user, const std::string& password) 
             return false;
         }
 
-        // --- CON BCRYPT ---
+        // BCRYPT
         std::cout << "[DEBUG] El usuario es nuevo. Generando Hash..." << std::endl;
 
         std::string fullHash = bcrypt::generateHash(password);
@@ -257,11 +255,9 @@ void Server::HandleClientPackets() {
 void Server::SendRankingToClient(sf::TcpSocket* client) {
     try {
         std::string currentUser = loggedInUsers[client];
-        sql::Statement* stmt = con->createStatement();
 
-        // 1. Top 10 (Se queda igual)
-        std::string queryTop10 = "SELECT userName, points, wins, losses FROM users ORDER BY points DESC, wins DESC LIMIT 10";
-        sql::ResultSet* res = stmt->executeQuery(queryTop10);
+        sql::Statement* stmt = con->createStatement();
+        sql::ResultSet* res = stmt->executeQuery("SELECT userName, points, wins, losses FROM users ORDER BY points DESC, wins DESC LIMIT 10");
 
         sf::Packet response;
         response << static_cast<int>(PacketType::RankingResponse);
@@ -274,38 +270,38 @@ void Server::SendRankingToClient(sf::TcpSocket* client) {
             ranking.push_back({ currentPos++, res->getString("userName"), res->getInt("points"), res->getInt("wins"), res->getInt("losses") });
         }
         delete res;
-
-        // 2. FILA EXTRA: La pedimos SIEMPRE y usamos el nombre de la BD
-        if (currentUser != "") {
-            // Añadimos userName a la query para sacar el nombre real de la BD
-            std::string queryMyRank =
-                "SELECT userName, points, wins, losses, "
-                "(SELECT COUNT(*) + 1 FROM users WHERE points > u.points) AS myPos "
-                "FROM users u WHERE userName = '" + currentUser + "'";
-
-            sql::ResultSet* resMe = stmt->executeQuery(queryMyRank);
-            if (resMe->next()) {
-                int myPos = resMe->getInt("myPos");
-                std::string dbName = resMe->getString("userName"); // <--- NOMBRE REAL
-                int pts = resMe->getInt("points");
-                int v = resMe->getInt("wins");
-                int d = resMe->getInt("losses");
-
-                // La añadimos como el elemento número 11
-                ranking.push_back({ myPos, dbName, pts, v, d });
-            }
-            delete resMe;
-        }
         delete stmt;
 
-        // Enviamos el paquete
+        if (currentUser != "") {
+            sql::PreparedStatement* pstmt = con->prepareStatement(
+                "SELECT userName, points, wins, losses, "
+                "(SELECT COUNT(*) + 1 FROM users WHERE points > u.points) AS myPos "
+                "FROM users u WHERE userName = ?"
+            );
+            pstmt->setString(1, currentUser);
+
+            sql::ResultSet* resMe = pstmt->executeQuery();
+            if (resMe->next()) {
+                ranking.push_back({
+                    resMe->getInt("myPos"),
+                    resMe->getString("userName"),
+                    resMe->getInt("points"),
+                    resMe->getInt("wins"),
+                    resMe->getInt("losses")
+                    });
+            }
+            delete resMe;
+            delete pstmt;
+        }
+
         response << static_cast<int>(ranking.size());
         for (const auto& p : ranking) {
             response << p.pos << p.name << p.pts << p.v << p.d;
         }
 
-        (void)client->send(response);
-        std::cout << "[SERVER] Ranking enviado (incluida fila propia)" << std::endl;
+        client->send(response);
+        std::cout << "[SERVER] Ranking enviado correctamente." << std::endl;
+
     }
     catch (sql::SQLException& e) {
         std::cout << "[BD] Error SQL enviando ranking: " << e.what() << std::endl;
@@ -326,17 +322,15 @@ void Server::Stop() {
 }
 
 void Server::HandleCreateRoom(sf::TcpSocket* client, const std::string& roomName) {
-    // 1. Comprobar si la sala ya existe
     for (const auto& room : activeRooms) {
         if (room.name == roomName) {
             sf::Packet response;
-            response << static_cast<int>(PacketType::RoomError); // Ya existe
+            response << static_cast<int>(PacketType::RoomError);
             (void)client->send(response);
             return;
         }
     }
 
-    // 2. Si no existe, la creamos y metemos al jugador 1
     Room newRoom;
     newRoom.name = roomName;
     newRoom.player1 = client;
@@ -350,26 +344,20 @@ void Server::HandleCreateRoom(sf::TcpSocket* client, const std::string& roomName
 }
 
 void Server::HandleJoinRoom(sf::TcpSocket* client, const std::string& roomName) {
-    // 1. Buscar la sala
     for (auto& room : activeRooms) {
         if (room.name == roomName) {
-            // 2. Ver si hay hueco
             if (room.player2 == nullptr) {
-                room.player2 = client; // ¡Lo sentamos en la silla 2!
+                room.player2 = client;
                 std::cout << "[SERVER] " << loggedInUsers[client] << " se ha unido a '" << roomName << "'" << std::endl;
 
-                // 3. Avisamos al Jugador 2 de que ha entrado bien
                 sf::Packet successResponse;
                 successResponse << static_cast<int>(PacketType::RoomSuccess);
                 (void)client->send(successResponse);
 
-                // 4. ¡AVISAMOS A LOS DOS DE QUE EMPIEZA LA PARTIDA!
-                // Al Player 1 le decimos que es su turno (true)
                 sf::Packet startP1;
                 startP1 << static_cast<int>(PacketType::GameStart) << true << loggedInUsers[room.player2];
                 (void)room.player1->send(startP1);
 
-                // Al Player 2 le decimos que NO es su turno (false)
                 sf::Packet startP2;
                 startP2 << static_cast<int>(PacketType::GameStart) << false << loggedInUsers[room.player1];
                 (void)room.player2->send(startP2);
@@ -377,7 +365,6 @@ void Server::HandleJoinRoom(sf::TcpSocket* client, const std::string& roomName) 
                 return;
             }
             else {
-                // La sala está llena
                 sf::Packet response;
                 response << static_cast<int>(PacketType::RoomError);
                 (void)client->send(response);
@@ -386,7 +373,6 @@ void Server::HandleJoinRoom(sf::TcpSocket* client, const std::string& roomName) 
         }
     }
 
-    // Si llega aquí, es que la sala no existe
     sf::Packet response;
     response << static_cast<int>(PacketType::RoomError);
     (void)client->send(response);
