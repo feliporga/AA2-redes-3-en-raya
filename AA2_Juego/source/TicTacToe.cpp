@@ -65,8 +65,15 @@ void TicTacToe::HandleInput() {
             int col = (int)((mouseX - startX) / cellSize);
             int row = (int)((mouseY - startY) / cellSize);
 
-            if (isMyTurn && board[row][col] == 0) {
-                NM.SendGameMove(row, col); 
+            if (currentPlayer == myPlayerID && board[row][col] == 0) {
+                int nextTurn = (myPlayerID % 4) + 1;
+                std::cout << "[ESCENA] Proximo Turno: " << nextTurn << std::endl;
+                ApplyMoveFromServer(row, col, myPlayerID, nextTurn);
+                NM.SendGameMove(row, col, myPlayerID); 
+            }
+            //DEBUG POR IA - ERROR NO CAMBIA EL TURNO
+            else if (currentPlayer != myPlayerID) {
+                std::cout << "[CLIENTE] Tranquilo, que todavia es el turno del Jugador " << currentPlayer << "!" << std::endl;
             }
            /* if (board[row][col] == 0) {
                 board[row][col] = currentPlayer;
@@ -103,6 +110,9 @@ bool TicTacToe::IsMyTurn(int nextPlayerTurn) {
     return myPlayerID == nextPlayerTurn;
 }
 void TicTacToe::ApplyMoveFromServer(int row, int col, int playerWhoMoved, int nextPlayerTurn) {
+    //LINEA DE DEBUG POR IA PARA DETECTAR ERROR
+    std::cout << "[ESCENA] Aplicando ficha del Jugador " << playerWhoMoved << ". Yo soy el ID " << myPlayerID << " y le toca al ID " << nextPlayerTurn << std::endl;
+
     board[row][col] = playerWhoMoved;
     movesCount++;
 
@@ -122,15 +132,16 @@ void TicTacToe::ApplyMoveFromServer(int row, int col, int playerWhoMoved, int ne
         gameOver = true;
     }
     else {
-        isMyTurn = IsMyTurn(nextPlayerTurn);
+        currentPlayer = nextPlayerTurn;
 
-        if (isMyTurn) {
+        std::cout << "[ESCENA] Jugador actual es: " << currentPlayer << std::endl;
+        if (currentPlayer == myPlayerID) {
             statusText->SetText("TU TURNO");
             statusText->SetColor(sf::Color::Green);
         }
         else {
-            statusText->SetText("TURNO DE " + opponentName);
-            statusText->SetColor(sf::Color::Red);
+            statusText->SetText("TURNO: " + GetPlayerName(currentPlayer));
+            statusText->SetColor(sf::Color::White);
         }
     }
 }
@@ -156,6 +167,14 @@ void TicTacToe::OnEnter() {
 
     statusText = new TextObject("TURNO: " + GetPlayerName(currentPlayer));
     statusText->GetTransform()->position = Vector2(RM->WINDOW_WIDTH / 2 - 200, 30);
+    if (myPlayerID == currentPlayer) {
+        statusText->SetText("TU TURNO");
+        statusText->SetColor(sf::Color::Green);
+    }
+    else {
+        statusText->SetText("TURNO: " + GetPlayerName(currentPlayer));
+        statusText->SetColor(sf::Color::White);
+    }
     SPAWN.SpawnObject(statusText);
 
     backButton = new Button(Vector2(50, 50), Vector2(210, 50), sf::Color(255, 0, 255, 255), "", Button::ActionType::ChangeScene, "MainMenu");

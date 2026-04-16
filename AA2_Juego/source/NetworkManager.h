@@ -16,9 +16,9 @@ private:
     sf::TcpSocket socket;
     sf::TcpListener p2pListener;
     std::vector<sf::TcpSocket*> p2pPeers;
+
+    int incomingConnections = 0;
     bool isConnected = false;
-    int hostBoard[NUM_ROWS][NUM_COLS];
-    int hostCurrentTurn = INITIAL_TURN;
 
     NetworkManager() {
         socket.setBlocking(false);
@@ -33,7 +33,6 @@ public:
         return instance;
     }
 
-    bool isP2PHost = false;
     // Estructura para guardar los datos del ranking temporalmente
     struct PlayerRecord {
         int pos;
@@ -77,7 +76,39 @@ public:
 
     void Listen() {
         if (!isConnected) return;
+        //Aceptar conexiones de los otros jugadores para P2P
+        if (incomingConnections > 0) {
+            sf::TcpSocket* incomingPeer = new sf::TcpSocket();
+            if (p2pListener.accept(*incomingPeer) == sf::Socket::Status::Done) {
+                incomingPeer->setBlocking(false);
+                p2pPeers.push_back(incomingPeer);
+                incomingConnections--;
+                std::cout << "[P2P] Un jugador se ha conectado a mi puerto, faltan: " << incomingConnections << " por entrar." << std::endl;
+            }
+            else {
+                delete incomingPeer;
+            }
+        }
 
+        for (auto* peer : p2pPeers) {
+            sf::Packet peerPacket;
+            while (peer->receive(peerPacket) == sf::Socket::Status::Done) {
+                int typeInt;
+                if (peerPacket >> typeInt) {
+                    if (typeInt == static_cast<int>(PacketType::UpdateBoard)) {
+                        int r, c, playerID, nextPlayerTurn;
+                        peerPacket >> r >> c >> playerID >> nextPlayerTurn;
+
+                        //LINEA DE DEBUG POR IA PARA DETECTAR ERROR
+                        std::cout << "[P2P] He recibido jugada del Jugador " << playerID << "! Pasa el turno al Jugador " << nextPlayerTurn << std::endl;
+                        TicTacToe* gameScene = dynamic_cast<TicTacToe*>(SceneManager::Instance().GetCurrentScene());
+                        if (gameScene) {
+                            gameScene->ApplyMoveFromServer(r, c, playerID, nextPlayerTurn);
+                        }
+                    }
+                }
+            }
+        }
         sf::Packet packet;
        
         if (socket.receive(packet) == sf::Socket::Status::Done) {
@@ -99,6 +130,7 @@ public:
             case PacketType::RegisterFailed:
                 std::cout << "[CLIENTE] Error: El nombre de usuario ya existe." << std::endl;
                 break;
+
             case PacketType::RankingResponse:
                 {
                 int numPlayers;
@@ -119,141 +151,58 @@ public:
             case PacketType::RoomError:
                 std::cout << "[CLIENTE] Error: La sala ya existe, esta llena o no se encontro." << std::endl;
                 break;
-            /*case PacketType::GameStart:
-            {
-                bool isMyTurn;
-                std::string opponentName;
-                packet >> isMyTurn >> opponentName;
 
-                std::cout << "\n=====================================" << std::endl;
-                std::cout << "  PARTIDA ENCONTRADA! VS " << opponentName << std::endl;
-                std::cout << "  Tu turno inicial: " << (isMyTurn ? "SI" : "NO") << std::endl;
-                std::cout << "=====================================\n" << std::endl;
-
-                // IMPORTANTE: Aquí cambiamos de escena automáticamente al empezar la partida
-                SceneManager::Instance().SetNextScene("TicTacToe");
-                break;
-            }*/
-            /*case PacketType::GameStart:
-            {
-                bool myTurn;
-                std::string opponent;
-                packet >> myTurn >> opponent;
-
-                this->nextGameMyTurn = myTurn;
-                this->nextGameOpponent = opponent;
-                this->nextGamePlayerID = myTurn ? 1 : 2;
-
-                std::cout << "[CLIENTE] Empieza la partida contra " << opponent << ". Mi turno: " << (myTurn ? "SI" : "NO") << std::endl;
-
-                SceneManager::Instance().SetNextScene("TicTacToe");
-                break;
-            }*/
 
             case PacketType::GameStart:
             {
-                bool isHost;
-                std::string hostIP;
-                packet >> isHost >> hostIP;
+                int myID;
+                unsigned short myPort;
+                int numPeers;
 
-                this->isP2PHost = isHost;
+                packet >> myID >> myPort >> numPeers;
+
+
+                this->nextGameMyTurn = (myID == 1); 
+                this->nextGameOpponent = "Jugadores P2P";
+                this->nextGamePlayerID = myID;
+
 
                 socket.disconnect();
-                isConnected = false;
-                std::cout << "[CLIENTE] Desconectado del servidor principal (Bootstrap)." << std::endl;
+                std::cout << "\n[CLIENTE] Bootstrap completado. Mi ID P2P es: " << myID << std::endl;
 
-                //Iniciar P2P
-                if (isHost) {
-                    p2pListener.setBlocking(true);
-                    if (p2pListener.listen(PEER_PORT) == sf::Socket::Status::Done) {
-                        std::cout << "[P2P] Esperando a que el peer se conecte" << std::endl;
-                        // Aceptamos al P2P y metemos su conexión en socket
-                        if (p2pListener.accept(socket) == sf::Socket::Status::Done) {
-                            std::cout << "[P2P] PEER conectado! La partida comienza." << std::endl;
-                            isConnected = true;
+                incomingConnections = 4 - myID;
 
-                            //El host es el ID 1 
-                            this->nextGameMyTurn = true;
-                            this->nextGameOpponent = "Jugador 2";
-                            this->nextGamePlayerID = 1;
+                if (incomingConnections > 0) {
+                    p2pListener.setBlocking(false);
+                    p2pListener.listen(myPort);
+                    std::cout << "[P2P] Escuchando en el puerto " << myPort << " a " << incomingConnections << " companeros..." << std::endl;
+                }
 
-                            //Seteamos valor inicial a la jugada
-                            for (int row = 0; row < NUM_ROWS; row++) {
-                                for (int col = 0; col < NUM_COLS; col++) {
-                                    hostBoard[row][col] = 0;
-                                }
-                            }
-                            hostCurrentTurn = 1;
+                for (int i = 0; i < numPeers; i++) {
+                    int peerID;
+                    std::string peerIP;
+                    unsigned short peerPort;
+                    packet >> peerID >> peerIP >> peerPort;
+
+                    if (myID > peerID) {
+                        sf::TcpSocket* newPeer = new sf::TcpSocket();
+                        newPeer->setBlocking(true); // Bloqueamos solo un momento para conectar
+
+                        sf::Socket::Status status = newPeer->connect(sf::IpAddress::resolve(peerIP).value(), peerPort, sf::seconds(5.0f));
+                        newPeer->setBlocking(false);
+
+                        if (status == sf::Socket::Status::Done) {
+                            p2pPeers.push_back(newPeer);
+                            std::cout << "[P2P] Conectado al Jugador " << peerID << " con exito!" << std::endl;
                         }
-                        p2pListener.setBlocking(false);
-                    } 
-
-                    else {
-                        std::cout << "[P2P] No se pudo abrir el puerto de host." << std::endl;
+                        else {
+                            std::cout << "[P2P ERROR] Fallo al conectar con el Jugador " << peerID << std::endl;
+                            delete newPeer;
+                        }
                     }
                 }
-                else {
-
-                    socket.setBlocking(true);
-                    sf::Socket::Status status = socket.connect(sf::IpAddress::resolve(hostIP).value(), PEER_PORT, sf::seconds(5.0f)); 
-                    //Linea de arriba generada por IA, debido a que petaba la IP del Host: linea original:
-                    //sf::Socket::Status status = socket.connect(hostIP, 55000, sf::seconds(5.0f));
-
-                    socket.setBlocking(false);
-
-                    if (status == sf::Socket::Status::Done) {
-                        std::cout << "[P2P] Conectado al host directamente con exito" << std::endl;
-                        isConnected = true; 
-
-                        this->nextGameMyTurn = false;
-                        this->nextGameOpponent = "Jugador 1";
-                        this->nextGamePlayerID = 2;
-                    }
-                    else {
-                        std::cout << "[P2P]Error: no se pudo conectar al Host en la IP: " << hostIP << std::endl;
-                    }
-                }
+                isConnected = true;
                 SceneManager::Instance().SetNextScene("TicTacToe");
-                break;
-            }
-            case PacketType::GameMove:
-            {
-                if (isP2PHost) {
-                    int row, col;
-                    packet >> row >> col;
-
-                    // El Host revisa si el movimiento del Peer es legal
-                    if (hostCurrentTurn == 2 && hostBoard[row][col] == 0) {
-                        hostBoard[row][col] = 2; 
-                        hostCurrentTurn = 1; 
-
-                        //El Host lo dibuja en su pantalla (el Peer fue quien movió)
-                        TicTacToe* gameScene = dynamic_cast<TicTacToe*>(SceneManager::Instance().GetCurrentScene());
-                        if (gameScene) gameScene->ApplyMoveFromServer(row, col, 2, 1);
-
-                        // El Host le confirma al Peer que el movimiento fue válido
-                        sf::Packet response;
-                        response << static_cast<int>(PacketType::UpdateBoard)
-                            << static_cast<int>(row) << static_cast<int>(col)
-                            << static_cast<int>(2)
-                            << static_cast<int>(1); 
-                        (void)socket.send(response);
-                    }
-
-                }
-                break;
-            }
-
-            case PacketType::UpdateBoard:
-            {
-                int row, col, playerID, nextPlayerTurn;
-                packet >> row >> col >> playerID >> nextPlayerTurn;
-
-                // Buscamos la escena actual y aplicamos el movimiento
-                TicTacToe* gameScene = dynamic_cast<TicTacToe*>(SceneManager::Instance().GetCurrentScene());
-                if (gameScene) {
-                    gameScene->ApplyMoveFromServer(row, col, playerID, nextPlayerTurn);
-                }
                 break;
             }
 
@@ -303,35 +252,23 @@ public:
         }
     }
 
-    void SendGameMove(int row, int col) {
+    void SendGameMove(int row, int col, int ID) {
         if (!isConnected) return;
         std::cout << "[CLIENTE] Pieza clickada en fila " << row << "y columna " << col << std::endl;
-        if (isP2PHost) {
+ 
+        int nextTurn = (ID % 4) + 1;
 
-            // Validamos nuestra propia jugada (comprobamos que sea nuestro turno y esté vacío)
-            if (hostCurrentTurn == 1 && hostBoard[row][col] == 0) {
-                hostBoard[row][col] = 1; 
-                hostCurrentTurn = 2;     
+        sf::Packet packet;
+        packet << static_cast<int>(PacketType::UpdateBoard) << static_cast<int>(row) << static_cast<int>(col)
+            << static_cast<int>(ID) << static_cast<int>(nextTurn);
 
-                // Dibujamos en nuestra propia pantalla al instante
-                TicTacToe* gameScene = dynamic_cast<TicTacToe*>(SceneManager::Instance().GetCurrentScene());
-                if (gameScene) gameScene->ApplyMoveFromServer(row, col, 1, 2);
-        
-                //Le enviamos la orden al otro jugador (el peer) de que lo dibuje (diciéndole que ahora es su turno)
-                sf::Packet packet;
-                packet << static_cast<int>(PacketType::UpdateBoard)
-                    << static_cast<int>(row) << static_cast<int>(col)
-                    << static_cast<int>(1)
-                    << static_cast<int>(2);
-                (void)socket.send(packet);
+        // Enviamos el tablero actualizado a los otros jugadores a la vez
+        for (auto* peer : p2pPeers) {
+            sf::Socket::Status status = peer->send(packet);
+            //LINEA DE DEBUG POR IA PARA DETECTAR ERROR
+            if (status != sf::Socket::Status::Done) {
+                std::cout << "[P2P ERROR] Fallo al enviar paquete a la tuberia." << std::endl;
             }
-        }
-        else {
-            // Al jugar su turno, el peer le envía las coordenadas al host para actualizar el movimiento
-            sf::Packet packet;
-            packet << static_cast<int>(PacketType::GameMove)
-                << static_cast<int>(row) << static_cast<int>(col);
-            (void)socket.send(packet);
         }
     }
 };

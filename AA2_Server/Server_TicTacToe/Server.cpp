@@ -228,18 +228,19 @@ void Server::HandleClientPackets() {
                         packet >> roomName;
                         HandleJoinRoom(client, roomName);
                     } 
-                    else if (type == PacketType::GameMove) {
+                   /* else if (type == PacketType::GameMove) {
                         int row = 0;
                         int col = 0;
                         packet >> row >> col;
                         std::cout << "[SERVER] " << loggedInUsers[client] << " ha intentado mover en Fila: " << row << ", Columna: " << col << std::endl;
                         HandleGameMove(client, row, col);
-                    }
+                    }*/
                 }
                 ++it;
             }
             else if (status == sf::Socket::Status::Disconnected || status == sf::Socket::Status::Error) {
                 std::cout << "[SERVER] Un cliente se ha desconectado." << std::endl;
+                loggedInUsers.erase(client);
                 selector.remove(*client);
                 client->disconnect();
                 delete client;
@@ -346,7 +347,7 @@ void Server::HandleCreateRoom(sf::TcpSocket* client, const std::string& roomName
     // 2. Si no existe, la creamos y metemos al jugador 1
     Room newRoom;
     newRoom.name = roomName;
-    newRoom.player1 = client;
+    newRoom.players.push_back(client);
     activeRooms.push_back(newRoom);
 
     std::cout << "[SERVER] Sala '" << roomName << "' creada por " << loggedInUsers[client] << std::endl;
@@ -361,33 +362,50 @@ void Server::HandleJoinRoom(sf::TcpSocket* client, const std::string& roomName) 
     for (auto& room : activeRooms) {
         if (room.name == roomName) {
             // 2. Ver si hay hueco
-            if (room.player2 == nullptr) {
-                room.player2 = client;
+            if (room.players.size() < 4) {
+                room.players.push_back(client);
                 std::cout << "[SERVER] " << loggedInUsers[client] << " se ha unido a '" << roomName << "'" << std::endl;
 
                 sf::Packet successResponse;
                 successResponse << static_cast<int>(PacketType::RoomSuccess);
                 (void)client->send(successResponse);
 
-                // Obtenemos la IP pública/local del Jugador 1
-                std::string p1Address = room.player1->getRemoteAddress().value().toString();
+                if (room.players.size() == 4) {
+                    std::cout << "[SERVER] Sala llena, iniciando emparejamiento..." << std::endl;
 
-                sf::Packet startP1;
-                startP1 << static_cast<int>(PacketType::GameStart) << true << "127.0.0.1"; 
-                (void)room.player1->send(startP1);
+                    //Estructura de los datos de los peers
+                    struct PeerData { 
+                        int id; 
+                        std::string ip; 
+                        unsigned short port; 
+                    };
 
-                sf::Packet startP2;
-                startP2 << static_cast<int>(PacketType::GameStart) << false << p1Address;
-                (void)room.player2->send(startP2);
+                    std::vector<PeerData> peers;
+                    for (int i = 0; i < room.players.size(); i++) {
+                        peers.push_back({i + 1, room.players[i]->getRemoteAddress().value().toString(), static_cast<unsigned short>(PORT + i)});
+                    }
 
-                std::cout << "[SERVER] Partida iniciada. Desconectando clientes del Bootstrap..." << std::endl;
+                    for (int i = 0; i < room.players.size(); i++) {
+                        sf::Packet startPacket;
+                        startPacket << static_cast<int>(PacketType::GameStart);
+                        startPacket << peers[i].id;   
+                        startPacket << peers[i].port;
+                        startPacket << static_cast<int>(3); 
 
-                selector.remove(*room.player1);
-                selector.remove(*room.player2);
+                        
+                        for (int j = 0; j < room.players.size(); j++) {
+                            if (i != j) { 
+                                startPacket << peers[j].id << peers[j].ip << peers[j].port;
+                            }
+                        }
 
-                room.player1->disconnect();
-                room.player2->disconnect();
+                        (void)room.players[i]->send(startPacket);
 
+                        //Desconectamos Bootstrap
+                        room.players[i]->disconnect();
+                    }
+                    room.players.clear();
+                }
                 return;
             }
             else {
@@ -406,35 +424,35 @@ void Server::HandleJoinRoom(sf::TcpSocket* client, const std::string& roomName) 
     (void)client->send(response);
 }
 
-void Server::HandleGameMove(sf::TcpSocket* client, int row, int col) {
-    // Buscamos en qué sala está este cliente
-    for (auto& room : activeRooms) {
-        if (room.player1 == client || room.player2 == client) {
-
-            int playerID = (room.player1 == client) ? 1 : 2;
-
-            // 1. Validar que sea su turno
-            if (room.currentTurn != playerID) return;
-
-            // 2. Validar que la casilla esté vacía
-            if (room.board[row][col] != 0) return;
-
-            // 3. Aplicar el movimiento en el servidor
-            room.board[row][col] = playerID;
-
-            // 4. Cambiar el turno
-            room.currentTurn = (playerID == 1) ? 2 : 1;
-
-            // 5. Avisar a AMBOS jugadores del movimiento y de quién le toca ahora
-            sf::Packet p1Packet, p2Packet;
-
-            p1Packet << static_cast<int>(PacketType::UpdateBoard) << row << col << playerID << (room.currentTurn == 1);
-            p2Packet << static_cast<int>(PacketType::UpdateBoard) << row << col << playerID << (room.currentTurn == 2);
-
-            (void)room.player1->send(p1Packet);
-            (void)room.player2->send(p2Packet);
-
-            return;
-        }
-    }
-}
+//void Server::HandleGameMove(sf::TcpSocket* client, int row, int col) {
+//    // Buscamos en qué sala está este cliente
+//    for (auto& room : activeRooms) {
+//        if (room.player1 == client || room.player2 == client) {
+//
+//            int playerID = (room.player1 == client) ? 1 : 2;
+//
+//            // 1. Validar que sea su turno
+//            if (room.currentTurn != playerID) return;
+//
+//            // 2. Validar que la casilla esté vacía
+//            if (room.board[row][col] != 0) return;
+//
+//            // 3. Aplicar el movimiento en el servidor
+//            room.board[row][col] = playerID;
+//
+//            // 4. Cambiar el turno
+//            room.currentTurn = (playerID == 1) ? 2 : 1;
+//
+//            // 5. Avisar a AMBOS jugadores del movimiento y de quién le toca ahora
+//            sf::Packet p1Packet, p2Packet;
+//
+//            p1Packet << static_cast<int>(PacketType::UpdateBoard) << row << col << playerID << (room.currentTurn == 1);
+//            p2Packet << static_cast<int>(PacketType::UpdateBoard) << row << col << playerID << (room.currentTurn == 2);
+//
+//            (void)room.player1->send(p1Packet);
+//            (void)room.player2->send(p2Packet);
+//
+//            return;
+//        }
+//    }
+//}

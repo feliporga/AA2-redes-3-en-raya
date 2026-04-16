@@ -16,7 +16,7 @@
 #define NUM_ROWS 6
 #define NUM_COLS 6
 #define EMPTY_BOARD 0
-
+#define PORT 56000
 #define HOST "127.0.0.1:3306"
 #define USER "root"
 #define PSSWRD "enti"
@@ -42,12 +42,12 @@ private:
         std::string name;
         sf::TcpSocket* player1 = nullptr;
         sf::TcpSocket* player2 = nullptr; 
-        
+        std::vector<sf::TcpSocket*> players;
         int board[NUM_ROWS][NUM_COLS]; // Tablero de 6x6 vacío
         int currentTurn = INITIAL_TURN;   
     };
 
-    void HandleGameMove(sf::TcpSocket* client, int row, int col);
+    //void HandleGameMove(sf::TcpSocket* client, int row, int col);
 
     std::vector<Room> activeRooms;
 
