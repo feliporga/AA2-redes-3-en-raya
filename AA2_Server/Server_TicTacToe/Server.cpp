@@ -259,7 +259,7 @@ void Server::SendRankingToClient(sf::TcpSocket* client) {
         std::string currentUser = loggedInUsers[client];
         sql::Statement* stmt = con->createStatement();
 
-        // ranking top 10
+        // 1. Top 10 (Se queda igual)
         std::string queryTop10 = "SELECT userName, points, wins, losses FROM users ORDER BY points DESC, wins DESC LIMIT 10";
         sql::ResultSet* res = stmt->executeQuery(queryTop10);
 
@@ -268,50 +268,44 @@ void Server::SendRankingToClient(sf::TcpSocket* client) {
 
         struct PlayerData { int pos; std::string name; int pts; int v; int d; };
         std::vector<PlayerData> ranking;
-
-        bool userInTop10 = false;
         int currentPos = 1;
 
         while (res->next()) {
-            std::string name = res->getString("userName");
-            int pts = res->getInt("points");
-            int v = res->getInt("wins");
-            int d = res->getInt("losses");
-
-            ranking.push_back({ currentPos, name, pts, v, d });
-            if (name == currentUser) userInTop10 = true;
-            currentPos++;
+            ranking.push_back({ currentPos++, res->getString("userName"), res->getInt("points"), res->getInt("wins"), res->getInt("losses") });
         }
         delete res;
 
-		// si no esta en el top 10, buscamos su posicion exacta
-        if (!userInTop10 && currentUser != "") {
+        // 2. FILA EXTRA: La pedimos SIEMPRE y usamos el nombre de la BD
+        if (currentUser != "") {
+            // Añadimos userName a la query para sacar el nombre real de la BD
             std::string queryMyRank =
-                "SELECT points, wins, losses, "
+                "SELECT userName, points, wins, losses, "
                 "(SELECT COUNT(*) + 1 FROM users WHERE points > u.points) AS myPos "
                 "FROM users u WHERE userName = '" + currentUser + "'";
 
             sql::ResultSet* resMe = stmt->executeQuery(queryMyRank);
             if (resMe->next()) {
                 int myPos = resMe->getInt("myPos");
+                std::string dbName = resMe->getString("userName"); // <--- NOMBRE REAL
                 int pts = resMe->getInt("points");
                 int v = resMe->getInt("wins");
                 int d = resMe->getInt("losses");
-                ranking.push_back({ myPos, currentUser, pts, v, d });
+
+                // La añadimos como el elemento número 11
+                ranking.push_back({ myPos, dbName, pts, v, d });
             }
             delete resMe;
         }
         delete stmt;
 
-		// enviamos al cliente el ranking completo (top 10 + su posicion si no esta)
+        // Enviamos el paquete
         response << static_cast<int>(ranking.size());
         for (const auto& p : ranking) {
             response << p.pos << p.name << p.pts << p.v << p.d;
         }
 
         (void)client->send(response);
-        std::cout << "[SERVER] Ranking enviado a " << currentUser << std::endl;
-
+        std::cout << "[SERVER] Ranking enviado (incluida fila propia)" << std::endl;
     }
     catch (sql::SQLException& e) {
         std::cout << "[BD] Error SQL enviando ranking: " << e.what() << std::endl;
