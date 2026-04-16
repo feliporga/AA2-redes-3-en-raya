@@ -34,27 +34,25 @@ void Server::DisconnectDatabase() {
 bool Server::CheckUserLogin(const std::string& user, const std::string& password) {
     std::cout << "[DEBUG] Entrando a CheckUserLogin..." << std::endl;
     try {
-        sql::Statement* stmt = con->createStatement();
+        // PREPARED STATEMENT
+        sql::PreparedStatement* stmt = con->prepareStatement(
+            "SELECT password FROM users WHERE userName = ?"
+        );
 
-        //buscamos usuario por  nombre
-        std::string query = "SELECT password FROM users WHERE userName = '" + user + "'";
+        stmt->setString(1, user);
 
         std::cout << "[DEBUG] Ejecutando SELECT de Login..." << std::endl;
-        sql::ResultSet* res = stmt->executeQuery(query);
+        sql::ResultSet* res = stmt->executeQuery();
 
         std::cout << "[DEBUG] Leyendo resultado del Login..." << std::endl;
         bool loginSuccess = false;
 
-        // Si el usuario existe, leemos su Hash // ayuda ia
         if (res->next()) {
             std::string hashFromDB = res->getString("password");
-
-            // Solución del hash "$2b$10$" manualmente por delante
             std::string reconstructedHash = "$2b$10$" + hashFromDB;
 
-            
             if (bcrypt::validatePassword(password, reconstructedHash)) {
-                loginSuccess = true; 
+                loginSuccess = true;
             }
         }
 
@@ -79,13 +77,15 @@ bool Server::RegisterUser(const std::string& user, const std::string& password) 
     try {
         // --- PASO 1: COMPROBAR CON COUNT(*) ---
         std::cout << "[DEBUG] Creando Statement para SELECT COUNT..." << std::endl;
-        sql::Statement* checkStmt = con->createStatement();
 
-        // Le pedimos a MySQL que cuente cuántos usuarios se llaman así
-        std::string checkQuery = "SELECT COUNT(*) FROM users WHERE userName = '" + user + "'";
+        sql::PreparedStatement* checkStmt = con->prepareStatement(
+            "SELECT COUNT(*) FROM users WHERE userName = ?"
+        );
+
+        checkStmt->setString(1, user);
 
         std::cout << "[DEBUG] Ejecutando SELECT de Registro..." << std::endl;
-        sql::ResultSet* res = checkStmt->executeQuery(checkQuery);
+        sql::ResultSet* res = checkStmt->executeQuery();
 
         std::cout << "[DEBUG] Leyendo conteo..." << std::endl;
         int count = 0;
@@ -101,24 +101,23 @@ bool Server::RegisterUser(const std::string& user, const std::string& password) 
             return false;
         }
 
-        // --- CON BCRYPT  ---
+        // --- CON BCRYPT ---
         std::cout << "[DEBUG] El usuario es nuevo. Generando Hash..." << std::endl;
 
-        // 1. Generamos el Hash completo de la contraseña
         std::string fullHash = bcrypt::generateHash(password);
-
-        // 2. Le cortamos"$2b$10$" //ayuda ia
-        // substr(7) coge todo el texto desde la posición 7 hasta el final.
         std::string hashForDB = fullHash.substr(7);
 
         std::cout << "[DEBUG] Creando Statement para INSERT..." << std::endl;
-        sql::Statement* insertStmt = con->createStatement();
 
-        // 3. Metemos el hash recortado en la base de datos
-        std::string insertQuery = "INSERT INTO users (userName, password) VALUES ('" + user + "', '" + hashForDB + "')";
+        sql::PreparedStatement* insertStmt = con->prepareStatement(
+            "INSERT INTO users (userName, password) VALUES (?, ?)"
+        );
+
+        insertStmt->setString(1, user);
+        insertStmt->setString(2, hashForDB);
 
         std::cout << "[DEBUG] Ejecutando INSERT..." << std::endl;
-        int rows = insertStmt->executeUpdate(insertQuery);
+        int rows = insertStmt->executeUpdate();
 
         delete insertStmt;
 
