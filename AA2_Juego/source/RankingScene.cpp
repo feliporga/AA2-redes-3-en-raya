@@ -93,15 +93,18 @@ void RankingScene::Update() {
 
     if (NM.newRankingAvailable) {
         float startY = 220.0f;
+        int rowCount = 0;
 
         for (const auto& player : NM.lastRanking) {
-            std::string displayName = std::to_string(player.pos) + ". " + player.name;
+            rowCount++;
 
-            if (player.pos > 10) {
+            if (rowCount > 10) {
                 startY += 20.0f;
             }
 
+            std::string displayName = std::to_string(player.pos) + ". " + player.name;
             CreateDummyRow(startY, displayName, std::to_string(player.v), std::to_string(player.d), std::to_string(player.pts));
+
             startY += 50.0f;
         }
 
