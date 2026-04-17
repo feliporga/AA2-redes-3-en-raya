@@ -504,21 +504,11 @@ void Server::UpdatePlayerStats(const std::string& user, int pointsOffset, int wi
     try {
         sql::Statement* stmt = con->createStatement();
 
-        // Lógica de puntos blindada anti-crasheos de MySQL hecho con ia 
-        std::string pointsLogic;
-        if (pointsOffset >= 0) {
-            pointsLogic = "points = points + " + std::to_string(pointsOffset);
-        }
-        else {
-            // Si vamos a restar, primero comprobamos si tiene suficientes puntos para no bajar de cero
-            int absOffset = std::abs(pointsOffset);
-            pointsLogic = "points = CASE WHEN points < " + std::to_string(absOffset) + " THEN 0 ELSE points - " + std::to_string(absOffset) + " END";
-        }
-
-        std::string query = "UPDATE users SET " +
-            pointsLogic + ", " +
-            "wins = wins + " + std::to_string(winOffset) + ", " +
-            "losses = losses + " + std::to_string(lossOffset) + " " +
+        
+        std::string query = "UPDATE users SET "
+            "points = points + " + std::to_string(pointsOffset) + ", "
+            "wins = wins + " + std::to_string(winOffset) + ", "
+            "losses = losses + " + std::to_string(lossOffset) + " "
             "WHERE userName = '" + user + "'";
 
         stmt->executeUpdate(query);
