@@ -18,6 +18,10 @@ private:
     float startY;
     float cellSize;
 
+    float turnTimer;
+
+    TextObject* timerText;
+
     TextObject* statusText;
     TextObject* roomCodeText;
     PlayerPiece* cellSprites[6][6];

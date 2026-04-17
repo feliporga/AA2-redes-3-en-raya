@@ -101,29 +101,41 @@ bool TicTacToe::IsMyTurn(int nextPlayerTurn) {
 }
 
 void TicTacToe::ApplyMoveFromServer(int row, int col, int playerWhoMoved, int nextPlayerTurn) {
-    // LINEA DE DEBUG POR IA PARA DETECTAR ERROR
-    std::cout << "[ESCENA] Aplicando ficha del Jugador " << playerWhoMoved << ". Yo soy el ID " << myPlayerID << " y le toca al ID " << nextPlayerTurn << std::endl;
 
-    board[row][col] = playerWhoMoved;
-    movesCount++;
+    // Resetear el cronómetro 
+    turnTimer = 20.0f;
 
-    Vector2 pos(startX + col * cellSize, startY + row * cellSize);
-    PlayerPiece* newSprite = new PlayerPiece(playerWhoMoved, pos);
+    //Movimiento time out
+    if (row == -1 && col == -1) {
+        std::cout << "[ESCENA] Omitiendo turno de " << playerWhoMoved << " por inactividad." << std::endl;
+    }
+    else {
 
-    SPAWN.SpawnObject(newSprite);
-    cellSprites[row][col] = newSprite;
+        // LINEA DE DEBUG POR IA PARA DETECTAR ERROR
+        std::cout << "[ESCENA] Aplicando ficha del Jugador " << playerWhoMoved << ". Yo soy el ID " << myPlayerID << " y le toca al ID " << nextPlayerTurn << std::endl;
+
+        board[row][col] = playerWhoMoved;
+        movesCount++;
+
+        Vector2 pos(startX + col * cellSize, startY + row * cellSize);
+        PlayerPiece* newSprite = new PlayerPiece(playerWhoMoved, pos);
+
+        SPAWN.SpawnObject(newSprite);
+        cellSprites[row][col] = newSprite;
+
+
+        if (CheckWin(playerWhoMoved)) {
+            //  añadimos al podio
+            if (std::find(podium.begin(), podium.end(), playerWhoMoved) == podium.end()) {
+                podium.push_back(playerWhoMoved);
+                std::cout << "[GAME] El jugador " << playerWhoMoved << " entra al podio en la posicion " << podium.size() << std::endl;
+            }
+        }
+    } 
+
 
     
-    if (CheckWin(playerWhoMoved)) {
-        //  añadimos al podio
-        if (std::find(podium.begin(), podium.end(), playerWhoMoved) == podium.end()) {
-            podium.push_back(playerWhoMoved);
-            std::cout << "[GAME] El jugador " << playerWhoMoved << " entra al podio en la posicion " << podium.size() << std::endl;
-        }
-    }
-
-   
-    CheckAndSendResults(); 
+    CheckAndSendResults();
 
     //actualizar texto
     if (gameOver) {
@@ -136,7 +148,7 @@ void TicTacToe::ApplyMoveFromServer(int row, int col, int playerWhoMoved, int ne
         gameOver = true;
     }
     else {
-        currentPlayer = nextPlayerTurn;
+        currentPlayer = nextPlayerTurn; // ¡Ahora sí que pasará de turno!
         std::cout << "[ESCENA] Jugador actual es: " << currentPlayer << std::endl;
 
         // Comprobamos si ya estoy en el podio
@@ -176,8 +188,18 @@ void TicTacToe::OnEnter() {
         }
     }
 
+    //timer logica
+    turnTimer = 20.0f;
+    timerText = new TextObject("TIEMPO: 20");
+  
+    timerText->GetTransform()->position = Vector2(RM->WINDOW_WIDTH / 2 - 60, 720.0f);
+    timerText->SetColor(sf::Color::Red);
+    SPAWN.SpawnObject(timerText);
+
+
     statusText = new TextObject("TURNO: " + GetPlayerName(currentPlayer));
     statusText->GetTransform()->position = Vector2(RM->WINDOW_WIDTH / 2 - 200, 30);
+
     if (myPlayerID == currentPlayer) {
         statusText->SetText("TU TURNO");
         statusText->SetColor(sf::Color::Green);
@@ -215,6 +237,36 @@ void TicTacToe::OnExit() {
 
 void TicTacToe::Update() {
     Scene::Update();
+
+
+
+    // cronometro
+    if (!gameOver && podium.size() < 3) {
+        turnTimer -= TIME.GetDeltaTime();
+
+        // Actualizamos el texto 
+        if (timerText) {
+            int secondsLeft = std::max(0, (int)std::ceil(turnTimer));
+            timerText->SetText("TIEMPO: " + std::to_string(secondsLeft));
+        }
+
+        // Si el tiempo llega a 0 ejecutar el salto de turno 
+        if (turnTimer <= 0.0f) {
+            turnTimer = 20.0f;
+
+            std::cout << "[GAME] Tiempo agotado para el Jugador " << currentPlayer << ". Saltando turno..." << std::endl; // ia para el debug
+
+            // a quién le toca ahora 
+            int nextTurn = currentPlayer;
+            do {
+                nextTurn = (nextTurn % 4) + 1;
+            } while (std::find(podium.begin(), podium.end(), nextTurn) != podium.end() && podium.size() < 3);
+
+            //movimeinto de salto
+            ApplyMoveFromServer(-1, -1, currentPlayer, nextTurn);
+        }
+    }
+
     HandleInput();
 }
 
