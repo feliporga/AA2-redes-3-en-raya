@@ -6,6 +6,7 @@
 #include "SceneManager.h"
 #include "TicTacToe.h"
 
+
 #define NM NetworkManager::Instance()
 #define NUM_ROWS 6
 #define NUM_COLS 6
@@ -252,11 +253,12 @@ public:
         }
     }
 
-    void SendGameMove(int row, int col, int ID) {
+   
+    void SendGameMove(int row, int col, int ID, int nextTurn) {
         if (!isConnected) return;
         std::cout << "[CLIENTE] Pieza clickada en fila " << row << "y columna " << col << std::endl;
- 
-        int nextTurn = (ID % 4) + 1;
+
+        // ahora deja espectear y se salta el turno de quien ha ganado
 
         sf::Packet packet;
         packet << static_cast<int>(PacketType::UpdateBoard) << static_cast<int>(row) << static_cast<int>(col)
@@ -265,10 +267,34 @@ public:
         // Enviamos el tablero actualizado a los otros jugadores a la vez
         for (auto* peer : p2pPeers) {
             sf::Socket::Status status = peer->send(packet);
-            //LINEA DE DEBUG POR IA PARA DETECTAR ERROR
             if (status != sf::Socket::Status::Done) {
                 std::cout << "[P2P ERROR] Fallo al enviar paquete a la tuberia." << std::endl;
             }
         }
+    }
+
+
+    void SendMatchResult(const std::string& roomName, int first, int second, int third, int fourth) {
+        
+        socket.disconnect();
+        socket.setBlocking(true); 
+
+        
+        if (socket.connect(sf::IpAddress(127, 0, 0, 1), 55000) == sf::Socket::Status::Done) {
+            isConnected = true;
+
+            // enviamos el resultado numérico // comentarios debug con ia para ayuda
+            sf::Packet packet;
+            packet << static_cast<int>(PacketType::ReportResult) << roomName << first << second << third << fourth;
+
+            if (socket.send(packet) == sf::Socket::Status::Done) {
+                std::cout << "[CLIENTE] Resultado enviado (IDs: " << first << ", " << second << ", " << third << ", " << fourth << ")." << std::endl;
+            }
+        }
+        else {
+            std::cout << "[CLIENTE ERROR] No se pudo reconectar al servidor." << std::endl;
+        }
+
+        socket.setBlocking(false); 
     }
 };

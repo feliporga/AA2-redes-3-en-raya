@@ -4,6 +4,7 @@
 #include "Button.h"
 #include "PlayerPiece.h"
 #include <string>
+#include <vector>
 
 class TicTacToe : public Scene {
 private:
@@ -26,6 +27,13 @@ private:
     std::string GetPlayerName(int player);
     bool CheckWin(int p);
     void HandleInput();
+
+
+    // puntuacion
+    std::vector<int> podium;     //ids del orden
+    bool hasSentResult = false;  
+
+    void CheckAndSendResults();  
 
 public:
     TicTacToe();

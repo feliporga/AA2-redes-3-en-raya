@@ -106,8 +106,9 @@ public:
         Scene::Update();
 
         // Mantenemos sincronizado el dato compartido
+      
         if (roomField) {
-            SM.sharedData = roomField->GetContent();
+            SM.sharedData = roomField->GetText();
         }
 
         // Lógica de clics

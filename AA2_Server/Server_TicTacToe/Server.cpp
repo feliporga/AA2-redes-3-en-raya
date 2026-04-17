@@ -228,6 +228,22 @@ void Server::HandleClientPackets() {
                         packet >> roomName;
                         HandleJoinRoom(client, roomName);
                     } 
+
+                    
+                 
+                               // --- EL BLOQUE VITAL PARA EL ELO QUE FALTABA ---
+                    else if (type == PacketType::ReportResult) {
+                        std::string roomName;
+                        int p1, p2, p3, p4;
+                        // Leemos la sala y los 4 IDs numéricos
+                        packet >> roomName >> p1 >> p2 >> p3 >> p4;
+
+                        std::cout << "[DEBUG] Paquete de final de partida recibido. Sala: " << roomName << std::endl;
+
+                        std::vector<int> finalStandings = { p1, p2, p3, p4 };
+                        HandleMatchResult(client, roomName, finalStandings);
+                    }
+
                    /* else if (type == PacketType::GameMove) {
                         int row = 0;
                         int col = 0;
@@ -373,37 +389,49 @@ void Server::HandleJoinRoom(sf::TcpSocket* client, const std::string& roomName) 
                 if (room.players.size() == 4) {
                     std::cout << "[SERVER] Sala llena, iniciando emparejamiento..." << std::endl;
 
+                    // --- NUEVO: GUARDAMOS LA PARTIDA Y LOS NOMBRES REALES ---
+                    OngoingMatch newMatch;
+                    newMatch.roomName = room.name;
+
+                    // Guardamos los nombres reales en orden (ID 1 = pos 0, ID 2 = pos 1...)
+                    for (auto* p : room.players) {
+                        newMatch.realNames.push_back(loggedInUsers[p]);
+                    }
+
+                    activeMatches.push_back(newMatch);
+                    // --------------------------------------------------------
+
                     //Estructura de los datos de los peers
-                    struct PeerData { 
-                        int id; 
-                        std::string ip; 
-                        unsigned short port; 
+                    struct PeerData {
+                        int id;
+                        std::string ip;
+                        unsigned short port;
                     };
 
                     std::vector<PeerData> peers;
                     for (int i = 0; i < room.players.size(); i++) {
-                        peers.push_back({i + 1, room.players[i]->getRemoteAddress().value().toString(), static_cast<unsigned short>(PORT + i)});
+                        peers.push_back({ i + 1, room.players[i]->getRemoteAddress().value().toString(), static_cast<unsigned short>(PORT + i) });
                     }
 
                     for (int i = 0; i < room.players.size(); i++) {
                         sf::Packet startPacket;
                         startPacket << static_cast<int>(PacketType::GameStart);
-                        startPacket << peers[i].id;   
+                        startPacket << peers[i].id;
                         startPacket << peers[i].port;
-                        startPacket << static_cast<int>(3); 
+                        startPacket << static_cast<int>(3); // Número de oponentes
 
-                        
                         for (int j = 0; j < room.players.size(); j++) {
-                            if (i != j) { 
+                            if (i != j) {
                                 startPacket << peers[j].id << peers[j].ip << peers[j].port;
                             }
                         }
 
                         (void)room.players[i]->send(startPacket);
 
-                        //Desconectamos Bootstrap
-                        room.players[i]->disconnect();
+                       
                     }
+
+                    // Limpiamos la sala 
                     room.players.clear();
                 }
                 return;
@@ -423,6 +451,85 @@ void Server::HandleJoinRoom(sf::TcpSocket* client, const std::string& roomName) 
     response << static_cast<int>(PacketType::RoomError);
     (void)client->send(response);
 }
+
+
+
+void Server::HandleMatchResult(sf::TcpSocket* client, const std::string& roomName, const std::vector<int>& placements) {
+    bool roomFound = false; 
+    for (auto it = activeMatches.begin(); it != activeMatches.end(); ++it) {
+        if (it->roomName == roomName) {
+            roomFound = true;
+            bool matched = false;
+
+            // Peer Verification // debugs hechos con ia 
+            for (auto& report : it->reportedResults) {
+                if (report.placements == placements) {
+                    matched = true;
+                    break;
+                }
+            }
+
+            if (matched) {
+                std::cout << "[SERVER] Resultados validados por pares para la sala: " << roomName << ". Actualizando ELO..." << std::endl;
+
+                std::string winner1 = it->realNames[placements[0] - 1];
+                std::string winner2 = it->realNames[placements[1] - 1];
+                std::string loser3 = it->realNames[placements[2] - 1];
+                std::string loser4 = it->realNames[placements[3] - 1];
+
+                UpdatePlayerStats(winner1, 30, 1, 0);
+                UpdatePlayerStats(winner2, 15, 1, 0);
+                UpdatePlayerStats(loser3, -15, 0, 1);
+                UpdatePlayerStats(loser4, -30, 0, 1);
+
+                activeMatches.erase(it);
+                return;
+            }
+            else {
+                MatchResult newReport;
+                newReport.placements = placements;
+                it->reportedResults.push_back(newReport);
+                std::cout << "[SERVER] Resultado parcial recibido de '" << roomName << "'. Esperando validacion de otro jugador..." << std::endl;
+                return;
+            }
+        }
+    }
+
+    if (!roomFound) {
+        std::cout << "[SERVER ERROR] Me ha llegado un resultado para la sala '" << roomName << "' pero no la tengo en memoria!" << std::endl;
+    }
+}
+
+void Server::UpdatePlayerStats(const std::string& user, int pointsOffset, int winOffset, int lossOffset) {
+    try {
+        sql::Statement* stmt = con->createStatement();
+
+        // Lógica de puntos blindada anti-crasheos de MySQL hecho con ia 
+        std::string pointsLogic;
+        if (pointsOffset >= 0) {
+            pointsLogic = "points = points + " + std::to_string(pointsOffset);
+        }
+        else {
+            // Si vamos a restar, primero comprobamos si tiene suficientes puntos para no bajar de cero
+            int absOffset = std::abs(pointsOffset);
+            pointsLogic = "points = CASE WHEN points < " + std::to_string(absOffset) + " THEN 0 ELSE points - " + std::to_string(absOffset) + " END";
+        }
+
+        std::string query = "UPDATE users SET " +
+            pointsLogic + ", " +
+            "wins = wins + " + std::to_string(winOffset) + ", " +
+            "losses = losses + " + std::to_string(lossOffset) + " " +
+            "WHERE userName = '" + user + "'";
+
+        stmt->executeUpdate(query);
+        delete stmt;
+        std::cout << "[BD] Stats actualizados para: " << user << " (Pts: " << pointsOffset << ")" << std::endl;
+    }
+    catch (sql::SQLException& e) {
+        std::cout << "[BD] Error actualizando stats: " << e.what() << std::endl;
+    }
+}
+
 
 //void Server::HandleGameMove(sf::TcpSocket* client, int row, int col) {
 //    // Buscamos en qué sala está este cliente

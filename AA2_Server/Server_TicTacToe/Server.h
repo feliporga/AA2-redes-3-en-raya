@@ -47,6 +47,24 @@ private:
         int currentTurn = INITIAL_TURN;   
     };
 
+
+    //SISTEMA DE RESULTADOS
+    struct MatchResult {
+        std::vector<int> placements; // IDs de los jugadores
+    };
+
+    struct OngoingMatch {
+        std::string roomName;
+        std::vector<std::string> realNames; // ID -> Nombre BD
+        std::vector<MatchResult> reportedResults;
+    };
+
+    std::vector<OngoingMatch> activeMatches;
+
+    
+    void HandleMatchResult(sf::TcpSocket* client, const std::string& roomName, const std::vector<int>& placements);
+    void UpdatePlayerStats(const std::string& user, int pointsOffset, int winOffset, int lossOffset);
+
     //void HandleGameMove(sf::TcpSocket* client, int row, int col);
 
     std::vector<Room> activeRooms;

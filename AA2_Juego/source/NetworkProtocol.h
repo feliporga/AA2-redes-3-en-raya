@@ -1,5 +1,7 @@
 #pragma once
 
+#pragma once
+
 enum class PacketType {
     //LOGIN / REGISTER
     LoginRequest,
@@ -12,12 +14,16 @@ enum class PacketType {
     RankingRequest,
     RankingResponse,
     //SALAS
-    CreateRoomRequest, 
-    JoinRoomRequest,   
-    RoomSuccess,       
-    RoomError,         
-    GameStart,          
+    CreateRoomRequest,
+    JoinRoomRequest,
+    RoomSuccess,
+    RoomError,
+    GameStart,
     //GAMEPLAY
-    GameMove,      
-    UpdateBoard    
+    GameMove,
+    UpdateBoard,
+
+    //ISTEMA DE RESULTADOS Y ELO
+    ReportResult,
+    ResultAcknowledge
 };
