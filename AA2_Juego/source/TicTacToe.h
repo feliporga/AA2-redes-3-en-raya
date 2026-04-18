@@ -20,6 +20,8 @@ private:
 
     float turnTimer;
 
+    float returnToLobbyTimer;
+
     TextObject* timerText;
 
     TextObject* statusText;
@@ -38,6 +40,9 @@ private:
     bool hasSentResult = false;  
 
     void CheckAndSendResults();  
+
+
+
 
 public:
     TicTacToe();

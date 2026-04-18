@@ -131,40 +131,36 @@ void TicTacToe::ApplyMoveFromServer(int row, int col, int playerWhoMoved, int ne
                 std::cout << "[GAME] El jugador " << playerWhoMoved << " entra al podio en la posicion " << podium.size() << std::endl;
             }
         }
-    } 
+    }
 
-
-    
     CheckAndSendResults();
 
-    //actualizar texto
-    if (gameOver) {
-        statusText->SetText("PARTIDA FINALIZADA");
-        statusText->SetColor(sf::Color::Yellow);
-    }
-    else if (movesCount >= 36) {
-        // En un tablero de 6x6 (36 casillas) si se llena antes de que ganen 3 personas
-        statusText->SetText("EMPATE - TABLERO LLENO");
-        gameOver = true;
-    }
-    else {
-        currentPlayer = nextPlayerTurn; // ¡Ahora sí que pasará de turno!
-        std::cout << "[ESCENA] Jugador actual es: " << currentPlayer << std::endl;
-
-        // Comprobamos si ya estoy en el podio
-        bool iAmInPodium = (std::find(podium.begin(), podium.end(), myPlayerID) != podium.end());
-
-        if (iAmInPodium) {
-            statusText->SetText("¡HAS GANADO! ESPERANDO AL RESTO...");
-            statusText->SetColor(sf::Color::Cyan);
-        }
-        else if (currentPlayer == myPlayerID) {
-            statusText->SetText("TU TURNO");
-            statusText->SetColor(sf::Color::Green);
+   
+    if (!gameOver) {
+        if (movesCount >= 36) {
+            // En un tablero de 6x6 (36 casillas) si se llena antes de que ganen 3 personas
+            statusText->SetText("EMPATE - TABLERO LLENO");
+            gameOver = true;
         }
         else {
-            statusText->SetText("TURNO: " + GetPlayerName(currentPlayer));
-            statusText->SetColor(sf::Color::White);
+            currentPlayer = nextPlayerTurn; 
+            std::cout << "[ESCENA] Jugador actual es: " << currentPlayer << std::endl;
+
+            // estoy podio?
+            bool iAmInPodium = (std::find(podium.begin(), podium.end(), myPlayerID) != podium.end());
+
+            if (iAmInPodium) {
+                statusText->SetText("¡HAS GANADO! ESPERANDO AL RESTO...");
+                statusText->SetColor(sf::Color::Cyan);
+            }
+            else if (currentPlayer == myPlayerID) {
+                statusText->SetText("TU TURNO");
+                statusText->SetColor(sf::Color::Green);
+            }
+            else {
+                statusText->SetText("TURNO: " + GetPlayerName(currentPlayer));
+                statusText->SetColor(sf::Color::White);
+            }
         }
     }
 }
@@ -176,6 +172,11 @@ void TicTacToe::OnEnter() {
 
     currentPlayer = 1;
     gameOver = false;
+
+    podium.clear();         
+    hasSentResult = false;
+
+    returnToLobbyTimer = 5.0f;
 
     mouseHeld = Input.GetLeftClick();
 
@@ -238,31 +239,33 @@ void TicTacToe::OnExit() {
 void TicTacToe::Update() {
     Scene::Update();
 
+    //ir al lobby
+    if (gameOver) {
+        returnToLobbyTimer -= TIME.GetDeltaTime();
 
-
+        if (returnToLobbyTimer <= 0.0f) {
+            NM.ResetP2P(); // Destruimos los sockets 
+            SM.SetNextScene("MainMenu"); 
+        }
+    }
     // cronometro
-    if (!gameOver && podium.size() < 3) {
+    else if (podium.size() < 3) {
         turnTimer -= TIME.GetDeltaTime();
 
-        // Actualizamos el texto 
         if (timerText) {
             int secondsLeft = std::max(0, (int)std::ceil(turnTimer));
             timerText->SetText("TIEMPO: " + std::to_string(secondsLeft));
         }
 
-        // Si el tiempo llega a 0 ejecutar el salto de turno 
         if (turnTimer <= 0.0f) {
             turnTimer = 20.0f;
+            std::cout << "[GAME] Tiempo agotado para el Jugador " << currentPlayer << ". Saltando turno..." << std::endl;
 
-            std::cout << "[GAME] Tiempo agotado para el Jugador " << currentPlayer << ". Saltando turno..." << std::endl; // ia para el debug
-
-            // a quién le toca ahora 
             int nextTurn = currentPlayer;
             do {
                 nextTurn = (nextTurn % 4) + 1;
             } while (std::find(podium.begin(), podium.end(), nextTurn) != podium.end() && podium.size() < 3);
 
-            //movimeinto de salto
             ApplyMoveFromServer(-1, -1, currentPlayer, nextTurn);
         }
     }
@@ -283,12 +286,12 @@ void TicTacToe::Render() {
 void TicTacToe::CheckAndSendResults() {
     if (gameOver || hasSentResult) return;
 
-    // 3 jugadores?
+    // acabar al haber 3 players en el podio
     if (podium.size() == 3) {
         gameOver = true;
         hasSentResult = true;
 
-        // No podio pierde
+        // No podio = pierde
         int loserID = 0;
         for (int i = 1; i <= 4; i++) {
             if (std::find(podium.begin(), podium.end(), i) == podium.end()) {
@@ -296,11 +299,21 @@ void TicTacToe::CheckAndSendResults() {
                 break;
             }
         }
-        podium.push_back(loserID); 
+        podium.push_back(loserID);
 
         std::cout << "[GAME] Partida terminada. Enviando resultados al servidor..." << std::endl;
-
-        // Enviamos directamente los números de ID (1, 2, 3 o 4)//NM logica ayuda ia
         NM.SendMatchResult(SM.sharedData, podium[0], podium[1], podium[2], podium[3]);
+
+        //Orden de victoria
+        std::string victoriaStr = "1ro: J" + std::to_string(podium[0]) +
+            " | 2do: J" + std::to_string(podium[1]) +
+            " | 3ro: J" + std::to_string(podium[2]) +
+            " | 4to: J" + std::to_string(podium[3]);
+
+        statusText->SetText(victoriaStr);
+        statusText->SetColor(sf::Color::Yellow);
+        statusText->GetTransform()->position = Vector2(RM->WINDOW_WIDTH / 2 - 320, 30); 
+
+        if (timerText) timerText->SetText(""); 
     }
 }

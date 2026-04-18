@@ -297,4 +297,26 @@ public:
 
         socket.setBlocking(false); 
     }
+
+
+
+
+
+    // resetear partida anterior
+    void ResetP2P() {
+        for (auto* peer : p2pPeers) {
+            peer->disconnect();
+            delete peer;
+        }
+        p2pPeers.clear();
+        p2pListener.close();
+        incomingConnections = 0;
+
+        // Reseteamos las variables de partida
+        nextGameMyTurn = false;
+        nextGameOpponent = "";
+        nextGamePlayerID = INITIAL_TURN;
+
+        std::cout << "[CLIENTE] Conexiones P2P cerradas. Listo para nueva partida." << std::endl;
+    }
 };
