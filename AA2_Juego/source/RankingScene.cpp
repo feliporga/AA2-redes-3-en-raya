@@ -3,6 +3,7 @@
 #include "RenderManager.h"
 #include "Spawner.h"
 #include "NetworkManager.h"
+#include <cctype>
 
 RankingScene::RankingScene() : Scene() {
     titleText = nullptr;
@@ -95,11 +96,41 @@ void RankingScene::Update() {
         float startY = 220.0f;
         int rowCount = 0;
 
+        // Lista de jugadores que se muestran
+        std::vector<std::string> drawnNames;
+
         for (const auto& player : NM.lastRanking) {
+
+            // Comprobamos si el jugador ya está en el Top 10
+            bool alreadyDrawn = false;
+            for (const std::string& drawnName : drawnNames) {
+                // Comparamos los nombres
+                if (drawnName.size() == player.name.size()) {
+                    bool match = true;
+                    for (size_t i = 0; i < drawnName.size(); ++i) {
+                        if (std::tolower(drawnName[i]) != std::tolower(player.name[i])) {
+                            match = false;
+                            break;
+                        }
+                    }
+                    if (match) {
+                        alreadyDrawn = true;
+                        break;
+                    }
+                }
+            }
+
+            // Si ya sale no lo mostramos
+            if (alreadyDrawn) {
+                continue;
+            }
+
+			// si es nuevo lo mostramos y lo añadimos a la lista de mostrados
+            drawnNames.push_back(player.name);
             rowCount++;
 
             if (rowCount > 10) {
-                startY += 20.0f;
+                startY += 20.0f; // Espacio extra solo si llegamos a la fila 11
             }
 
             std::string displayName = std::to_string(player.pos) + ". " + player.name;
