@@ -19,7 +19,7 @@ std::string TicTacToe::GetPlayerName(int player) {
     if (player == 2) return "JUGADOR 2 (TRIANGULO)";
     if (player == 3) return "JUGADOR 3 (CIRCULO)";
     if (player == 4) return "JUGADOR 4 (CRUZ)";
-    return "";
+    return " ";
 }
 
 bool TicTacToe::CheckWin(int p) {

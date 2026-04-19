@@ -45,6 +45,7 @@ private:
 
 
 public:
+
     TicTacToe();
     ~TicTacToe() = default;
 

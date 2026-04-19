@@ -33,6 +33,7 @@ public:
         static NetworkManager instance;
         return instance;
     }
+    
 
     // Estructura para guardar los datos del ranking temporalmente
     struct PlayerRecord {
@@ -42,6 +43,7 @@ public:
         int v;
         int d;
     };
+    std::map<int, PlayerRecord> playersInMatch;
     std::vector<PlayerRecord> lastRanking;
     bool newRankingAvailable = false;
 
@@ -183,8 +185,16 @@ public:
                     int peerID;
                     std::string peerIP;
                     unsigned short peerPort;
-                    packet >> peerID >> peerIP >> peerPort;
+                    std::string peerName;
+                    int peerScore;
 
+                    packet >> peerID >> peerIP >> peerPort >> peerName >> peerScore;
+
+                    PlayerRecord record;
+                    record.name = peerName;
+                    record.pts = peerScore;
+
+                    playersInMatch[peerID] = record;
                     if (myID > peerID) {
                         sf::TcpSocket* newPeer = new sf::TcpSocket();
                         newPeer->setBlocking(true); // Bloqueamos solo un momento para conectar

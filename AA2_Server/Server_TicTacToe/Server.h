@@ -19,7 +19,7 @@
 #define PORT 56000
 #define HOST "127.0.0.1:3306"
 #define USER "root"
-#define PSSWRD "enti"
+#define PSSWRD ""
 #define DBNAME "tictactoe_db"
 class Server {
 private:

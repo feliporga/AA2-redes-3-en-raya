@@ -229,9 +229,6 @@ void Server::HandleClientPackets() {
                         HandleJoinRoom(client, roomName);
                     } 
 
-                    
-                 
-                               // --- EL BLOQUE VITAL PARA EL ELO QUE FALTABA ---
                     else if (type == PacketType::ReportResult) {
                         std::string roomName;
                         int p1, p2, p3, p4;
@@ -389,7 +386,7 @@ void Server::HandleJoinRoom(sf::TcpSocket* client, const std::string& roomName) 
                 if (room.players.size() == 4) {
                     std::cout << "[SERVER] Sala llena, iniciando emparejamiento..." << std::endl;
 
-                    // --- NUEVO: GUARDAMOS LA PARTIDA Y LOS NOMBRES REALES ---
+                    //Guardamos la partida y lo nombres
                     OngoingMatch newMatch;
                     newMatch.roomName = room.name;
 
@@ -399,13 +396,18 @@ void Server::HandleJoinRoom(sf::TcpSocket* client, const std::string& roomName) 
                     }
 
                     activeMatches.push_back(newMatch);
-                    // --------------------------------------------------------
+
+                    sql::Statement* stmt = con->createStatement();
+                    std::string queryPoints = "SELECT points FROM users WHERE username = '...' ";
+                    sql::ResultSet* res = stmt->executeQuery(queryPoints);
 
                     //Estructura de los datos de los peers
                     struct PeerData {
                         int id;
                         std::string ip;
                         unsigned short port;
+                        std::string name;
+                        int score;
                     };
 
                     std::vector<PeerData> peers;
@@ -422,7 +424,7 @@ void Server::HandleJoinRoom(sf::TcpSocket* client, const std::string& roomName) 
 
                         for (int j = 0; j < room.players.size(); j++) {
                             if (i != j) {
-                                startPacket << peers[j].id << peers[j].ip << peers[j].port;
+                                startPacket << peers[j].id << peers[j].ip << peers[j].port <<peers[j].name << peers[j].score;
                             }
                         }
 
