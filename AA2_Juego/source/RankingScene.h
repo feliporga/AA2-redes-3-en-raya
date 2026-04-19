@@ -5,6 +5,10 @@
 #include <vector>
 #include <string>
 
+#define TEXT_COLOR sf::Color(200, 200, 200, 255)
+#define BUTTON_POSITION Vector2(50.0f, 50.0f)
+#define BUTTON_SIZE Vector2(210.0f, 50.0f)
+#define BUTTON_COLOR sf::Color(0, 100, 200, 255)
 class RankingScene : public Scene {
 private:
     TextObject* titleText;

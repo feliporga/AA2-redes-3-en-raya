@@ -5,9 +5,9 @@
 #include "Spawner.h"
 
 TicTacToe::TicTacToe() : Scene() {
-    startX = 380.0f;
-    startY = 84.0f;
-    cellSize = 100.0f;
+    startX = STARTX;
+    startY = STARTY;
+    cellSize = CELLSIZE;
 
     statusText = nullptr;
     backButton = nullptr;
@@ -109,8 +109,8 @@ bool TicTacToe::IsMyTurn(int nextPlayerTurn) {
 
 void TicTacToe::ApplyMoveFromServer(int row, int col, int playerWhoMoved, int nextPlayerTurn) {
 
-    // Resetear el cronómetro 
-    turnTimer = 20.0f;
+    // Resetear el cronï¿½metro 
+    turnTimer = INITIAL_TIMER;
 
     //Movimiento time out
     if (row == -1 && col == -1) {
@@ -132,7 +132,7 @@ void TicTacToe::ApplyMoveFromServer(int row, int col, int playerWhoMoved, int ne
 
 
         if (CheckWin(playerWhoMoved)) {
-            //  añadimos al podio
+            //  aï¿½adimos al podio
             if (std::find(podium.begin(), podium.end(), playerWhoMoved) == podium.end()) {
                 podium.push_back(playerWhoMoved);
                 std::cout << "[GAME] El jugador " << playerWhoMoved << " entra al podio en la posicion " << podium.size() << std::endl;
@@ -144,7 +144,7 @@ void TicTacToe::ApplyMoveFromServer(int row, int col, int playerWhoMoved, int ne
 
    
     if (!gameOver) {
-        if (movesCount >= 36) {
+        if (movesCount >= BOARD_SIZE * BOARD_SIZE) {
             // En un tablero de 6x6 (36 casillas) si se llena antes de que ganen 3 personas
             statusText->SetText("EMPATE - TABLERO LLENO");
             gameOver = true;
@@ -157,7 +157,7 @@ void TicTacToe::ApplyMoveFromServer(int row, int col, int playerWhoMoved, int ne
             bool iAmInPodium = (std::find(podium.begin(), podium.end(), myPlayerID) != podium.end());
 
             if (iAmInPodium) {
-                statusText->SetText("¡HAS GANADO! ESPERANDO AL RESTO...");
+                statusText->SetText("ï¿½HAS GANADO! ESPERANDO AL RESTO...");
                 statusText->SetColor(sf::Color::Cyan);
             }
             else if (currentPlayer == myPlayerID) {
@@ -197,8 +197,8 @@ void TicTacToe::OnEnter() {
     }
 
     //timer logica
-    turnTimer = 20.0f;
-    timerText = new TextObject("TIEMPO: 20");
+    turnTimer = INITIAL_TIMER;
+    timerText = new TextObject("TIEMPO: " + std::to_string((int)INITIAL_TIMER));
   
     timerText->GetTransform()->position = Vector2(RM->WINDOW_WIDTH / 2 - 60, 720.0f);
     timerText->SetColor(sf::Color::Red);
@@ -218,11 +218,11 @@ void TicTacToe::OnEnter() {
     }
     SPAWN.SpawnObject(statusText);
 
-    backButton = new Button(Vector2(50, 50), Vector2(210, 50), sf::Color(255, 0, 255, 255), "", Button::ActionType::None);
+    backButton = new Button(BUTTON_POSITION, BUTTON_SIZE, COLOR_BACK_BUTTON, "", Button::ActionType::ChangeScene, "MainMenu");
     SPAWN.SpawnObject(backButton);
 
     backButtonText = new TextObject("VOLVER");
-    backButtonText->GetTransform()->position = Vector2(75.0f, 60.0f);
+    backButtonText->GetTransform()->position = BACK_TEXT_POSITION;
     SPAWN.SpawnObject(backButtonText);
 
     std::string roomCode = SM.sharedData;
@@ -234,7 +234,7 @@ void TicTacToe::OnEnter() {
     }
 
     roomCodeText = new TextObject(roomCode);
-    roomCodeText->GetTransform()->position = Vector2(20.0f, 20.0f);
+    roomCodeText->GetTransform()->position = ROOM_CODE_POSITION;
     roomCodeText->SetColor(sf::Color::Cyan);
     SPAWN.SpawnObject(roomCodeText);
 }

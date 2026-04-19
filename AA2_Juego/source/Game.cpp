@@ -10,9 +10,11 @@
 #include "RankingScene.h"
 #include "GameOverScene.h"
 
+#define SERVER_IP "188.84.43.62"
+#define SERVER_PORT 55000
 
 void Game::Init() {
-    NM.ConnectToServer(SERVER_IP, 55000);
+    NM.ConnectToServer(SERVER_IP, SERVER_PORT);
     RM->Init();
 
     AM.LoadSong("menuMusic");

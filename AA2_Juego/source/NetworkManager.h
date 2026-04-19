@@ -5,6 +5,8 @@
 #include "NetworkProtocol.h"
 #include "SceneManager.h"
 #include "TicTacToe.h"
+#define SERVER_IP 188,84,43,62
+#define SERVER_PORT 55000
 
 
 #define NM NetworkManager::Instance()
@@ -301,10 +303,10 @@ public:
         socket.setBlocking(true); 
 
         
-        if (socket.connect(sf::IpAddress::resolve(SERVER_IP).value(), 55000) == sf::Socket::Status::Done) {
+        if (socket.connect(sf::IpAddress(SERVER_IP), SERVER_PORT) == sf::Socket::Status::Done) {
             isConnected = true;
 
-            // enviamos el resultado numérico // comentarios debug con ia para ayuda
+            // enviamos el resultado numï¿½rico // comentarios debug con ia para ayuda
             sf::Packet packet;
             packet << static_cast<int>(PacketType::ReportResult) << roomName << first << second << third << fourth;
 
