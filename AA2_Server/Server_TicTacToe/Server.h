@@ -69,8 +69,6 @@ private:
     void HandleMatchResult(sf::TcpSocket* client, const std::string& roomName, const std::vector<int>& placements);
     void UpdatePlayerStats(const std::string& user, int pointsOffset, int winOffset, int lossOffset);
 
-    //void HandleGameMove(sf::TcpSocket* client, int row, int col);
-
     std::vector<Room> activeRooms;
 
     void HandleCreateRoom(sf::TcpSocket* client, const std::string& roomName);
