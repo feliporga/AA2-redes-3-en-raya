@@ -10,7 +10,7 @@
 #include "RankingScene.h"
 #include "GameOverScene.h"
 
-#define SERVER_IP "188.84.43.62"
+#define SERVER_IP "127.0.0.1"
 #define SERVER_PORT 55000
 
 void Game::Init() {

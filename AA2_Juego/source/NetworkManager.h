@@ -303,7 +303,7 @@ public:
         socket.setBlocking(true); 
 
         
-        if (socket.connect(sf::IpAddress(SERVER_IP), SERVER_PORT) == sf::Socket::Status::Done) {
+        if (socket.connect(sf::IpAddress::resolve(SERVER_IP).value(), 55000) == sf::Socket::Status::Done) {
             isConnected = true;
 
             // enviamos el resultado num�rico // comentarios debug con ia para ayuda
