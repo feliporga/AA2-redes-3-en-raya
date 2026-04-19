@@ -12,6 +12,15 @@
 
 #include "NetworkProtocol.h"
 
+#define INITIAL_TURN 1
+#define NUM_ROWS 6
+#define NUM_COLS 6
+#define EMPTY_BOARD 0
+#define PORT 56000
+#define HOST "127.0.0.1:3306"
+#define USER "root"
+#define PSSWRD ""
+#define DBNAME "tictactoe_db"
 class Server {
 private:
     unsigned short port;
@@ -23,22 +32,43 @@ private:
 
     sql::Driver* driver;
     sql::Connection* con;
-    std::string dbHost = "127.0.0.1:3306";
-    std::string dbUser = "root";
-    std::string dbPass = "enti";
-    std::string dbName = "tictactoe_db";
+    std::string dbHost = HOST;
+    std::string dbUser = USER;
+    std::string dbPass = PSSWRD;
+    std::string dbName = DBNAME;
 
     // Estructura para una sala de 3 en Raya
     struct Room {
         std::string name;
         sf::TcpSocket* player1 = nullptr;
-        sf::TcpSocket* player2 = nullptr;
+        sf::TcpSocket* player2 = nullptr; 
+        std::vector<sf::TcpSocket*> players;
+        int board[NUM_ROWS][NUM_COLS]; // Tablero de 6x6 vacío
+        int currentTurn = INITIAL_TURN;   
     };
 
-    // Lista de salas activas
+
+    //SISTEMA DE RESULTADOS
+    struct MatchResult {
+        std::vector<int> placements; // IDs de los jugadores
+    };
+
+    struct OngoingMatch {
+        std::string roomName;
+        std::vector<std::string> realNames; // ID -> Nombre BD
+        std::vector<MatchResult> reportedResults;
+    };
+
+    std::vector<OngoingMatch> activeMatches;
+
+    
+    void HandleMatchResult(sf::TcpSocket* client, const std::string& roomName, const std::vector<int>& placements);
+    void UpdatePlayerStats(const std::string& user, int pointsOffset, int winOffset, int lossOffset);
+
+    //void HandleGameMove(sf::TcpSocket* client, int row, int col);
+
     std::vector<Room> activeRooms;
 
-    // Métodos para gestionar salas
     void HandleCreateRoom(sf::TcpSocket* client, const std::string& roomName);
     void HandleJoinRoom(sf::TcpSocket* client, const std::string& roomName);
 

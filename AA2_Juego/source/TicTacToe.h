@@ -4,6 +4,7 @@
 #include "Button.h"
 #include "PlayerPiece.h"
 #include <string>
+#include <vector>
 
 class TicTacToe : public Scene {
 private:
@@ -17,6 +18,12 @@ private:
     float startY;
     float cellSize;
 
+    float turnTimer;
+
+    float returnToLobbyTimer;
+
+    TextObject* timerText;
+
     TextObject* statusText;
     TextObject* roomCodeText;
     PlayerPiece* cellSprites[6][6];
@@ -27,7 +34,18 @@ private:
     bool CheckWin(int p);
     void HandleInput();
 
+
+    // puntuacion
+    std::vector<int> podium;     //ids del orden
+    bool hasSentResult = false;  
+
+    void CheckAndSendResults();  
+
+
+
+
 public:
+
     TicTacToe();
     ~TicTacToe() = default;
 
@@ -35,4 +53,11 @@ public:
     void OnExit() override;
     void Update() override;
     void Render() override;
+
+    bool isMyTurn = false;
+    int myPlayerID = 1;
+    std::string opponentName = "";
+
+    void ApplyMoveFromServer(int row, int col, int playerMoved, int nextPlayerturn);
+    bool IsMyTurn(int nextPlayerTurn);
 };

@@ -4,24 +4,36 @@
 #include <string>
 #include "NetworkProtocol.h"
 #include "SceneManager.h"
+#include "TicTacToe.h"
+
 
 #define NM NetworkManager::Instance()
-
+#define NUM_ROWS 6
+#define NUM_COLS 6
+#define INITIAL_TURN 1
+#define PEER_PORT 55000
 class NetworkManager {
 private:
     sf::TcpSocket socket;
+    sf::TcpListener p2pListener;
+    std::vector<sf::TcpSocket*> p2pPeers;
+
+    int incomingConnections = 0;
     bool isConnected = false;
 
     NetworkManager() {
-        // Run in non-blocking mode to prevent the game from freezing while listening
         socket.setBlocking(false);
     }
 
 public:
+    bool nextGameMyTurn = false;
+    std::string nextGameOpponent = "";
+    int nextGamePlayerID = INITIAL_TURN;
     static NetworkManager& Instance() {
         static NetworkManager instance;
         return instance;
     }
+    
 
     // Estructura para guardar los datos del ranking temporalmente
     struct PlayerRecord {
@@ -31,16 +43,15 @@ public:
         int v;
         int d;
     };
+    std::map<int, PlayerRecord> playersInMatch;
     std::vector<PlayerRecord> lastRanking;
     bool newRankingAvailable = false;
 
     bool ConnectToServer(const std::string& ip, unsigned short port) {
-        // Temporarily block to ensure connection is established before continuing
         socket.setBlocking(true);
 
         sf::Socket::Status status = socket.connect(sf::IpAddress::resolve(ip).value(), port, sf::seconds(2.0f));
 
-        // Revert to non-blocking for normal gameplay
         socket.setBlocking(false);
 
         if (status == sf::Socket::Status::Done) {
@@ -68,9 +79,41 @@ public:
 
     void Listen() {
         if (!isConnected) return;
+        //Aceptar conexiones de los otros jugadores para P2P
+        if (incomingConnections > 0) {
+            sf::TcpSocket* incomingPeer = new sf::TcpSocket();
+            if (p2pListener.accept(*incomingPeer) == sf::Socket::Status::Done) {
+                incomingPeer->setBlocking(false);
+                p2pPeers.push_back(incomingPeer);
+                incomingConnections--;
+                std::cout << "[P2P] Un jugador se ha conectado a mi puerto, faltan: " << incomingConnections << " por entrar." << std::endl;
+            }
+            else {
+                delete incomingPeer;
+            }
+        }
 
+        for (auto* peer : p2pPeers) {
+            sf::Packet peerPacket;
+            while (peer->receive(peerPacket) == sf::Socket::Status::Done) {
+                int typeInt;
+                if (peerPacket >> typeInt) {
+                    if (typeInt == static_cast<int>(PacketType::UpdateBoard)) {
+                        int r, c, playerID, nextPlayerTurn;
+                        peerPacket >> r >> c >> playerID >> nextPlayerTurn;
+
+                        //LINEA DE DEBUG POR IA PARA DETECTAR ERROR
+                        std::cout << "[P2P] He recibido jugada del Jugador " << playerID << "! Pasa el turno al Jugador " << nextPlayerTurn << std::endl;
+                        TicTacToe* gameScene = dynamic_cast<TicTacToe*>(SceneManager::Instance().GetCurrentScene());
+                        if (gameScene) {
+                            gameScene->ApplyMoveFromServer(r, c, playerID, nextPlayerTurn);
+                        }
+                    }
+                }
+            }
+        }
         sf::Packet packet;
-        // Poll for incoming packets every frame without hanging the main loop
+       
         if (socket.receive(packet) == sf::Socket::Status::Done) {
             int typeInt;
             packet >> typeInt;
@@ -90,18 +133,19 @@ public:
             case PacketType::RegisterFailed:
                 std::cout << "[CLIENTE] Error: El nombre de usuario ya existe." << std::endl;
                 break;
+
             case PacketType::RankingResponse:
                 {
                 int numPlayers;
                 packet >> numPlayers;
-                lastRanking.clear(); // Limpiamos la lista vieja
+                lastRanking.clear(); 
 
                 for (int i = 0; i < numPlayers; i++) {
                     PlayerRecord rec;
                     packet >> rec.pos >> rec.name >> rec.pts >> rec.v >> rec.d;
                     lastRanking.push_back(rec);
                 }
-                newRankingAvailable = true; // ¡Avisamos a la escena de que ya están listos!
+                newRankingAvailable = true; 
                 break;
                 }
             case PacketType::RoomSuccess:
@@ -110,21 +154,69 @@ public:
             case PacketType::RoomError:
                 std::cout << "[CLIENTE] Error: La sala ya existe, esta llena o no se encontro." << std::endl;
                 break;
+
+
             case PacketType::GameStart:
             {
-                bool isMyTurn;
-                std::string opponentName;
-                packet >> isMyTurn >> opponentName;
+                int myID;
+                unsigned short myPort;
+                int numPeers;
 
-                std::cout << "\n=====================================" << std::endl;
-                std::cout << "  PARTIDA ENCONTRADA! VS " << opponentName << std::endl;
-                std::cout << "  Tu turno inicial: " << (isMyTurn ? "SI" : "NO") << std::endl;
-                std::cout << "=====================================\n" << std::endl;
+                packet >> myID >> myPort >> numPeers;
 
-                // IMPORTANTE: Aquí cambiamos de escena automáticamente al empezar la partida
+
+                this->nextGameMyTurn = (myID == 1); 
+                this->nextGameOpponent = "Jugadores P2P";
+                this->nextGamePlayerID = myID;
+
+
+                socket.disconnect();
+                std::cout << "\n[CLIENTE] Bootstrap completado. Mi ID P2P es: " << myID << std::endl;
+
+                incomingConnections = 4 - myID;
+
+                if (incomingConnections > 0) {
+                    p2pListener.setBlocking(false);
+                    p2pListener.listen(myPort);
+                    std::cout << "[P2P] Escuchando en el puerto " << myPort << " a " << incomingConnections << " companeros..." << std::endl;
+                }
+
+                for (int i = 0; i < numPeers; i++) {
+                    int peerID;
+                    std::string peerIP;
+                    unsigned short peerPort;
+                    std::string peerName;
+                    int peerScore;
+
+                    packet >> peerID >> peerIP >> peerPort >> peerName >> peerScore;
+
+                    PlayerRecord record;
+                    record.name = peerName;
+                    record.pts = peerScore;
+
+                    playersInMatch[peerID] = record;
+                    if (myID > peerID) {
+                        sf::TcpSocket* newPeer = new sf::TcpSocket();
+                        newPeer->setBlocking(true); // Bloqueamos solo un momento para conectar
+
+                        sf::Socket::Status status = newPeer->connect(sf::IpAddress::resolve(peerIP).value(), peerPort, sf::seconds(5.0f));
+                        newPeer->setBlocking(false);
+
+                        if (status == sf::Socket::Status::Done) {
+                            p2pPeers.push_back(newPeer);
+                            std::cout << "[P2P] Conectado al Jugador " << peerID << " con exito!" << std::endl;
+                        }
+                        else {
+                            std::cout << "[P2P ERROR] Fallo al conectar con el Jugador " << peerID << std::endl;
+                            delete newPeer;
+                        }
+                    }
+                }
+                isConnected = true;
                 SceneManager::Instance().SetNextScene("TicTacToe");
                 break;
             }
+
             }
 
         }
@@ -169,5 +261,72 @@ public:
         if (socket.send(packet) == sf::Socket::Status::Done) {
             std::cout << "[CLIENTE] Peticion para UNIRSE a sala '" << roomName << "' enviada." << std::endl;
         }
+    }
+
+   
+    void SendGameMove(int row, int col, int ID, int nextTurn) {
+        if (!isConnected) return;
+        std::cout << "[CLIENTE] Pieza clickada en fila " << row << "y columna " << col << std::endl;
+
+        // ahora deja espectear y se salta el turno de quien ha ganado
+
+        sf::Packet packet;
+        packet << static_cast<int>(PacketType::UpdateBoard) << static_cast<int>(row) << static_cast<int>(col)
+            << static_cast<int>(ID) << static_cast<int>(nextTurn);
+
+        // Enviamos el tablero actualizado a los otros jugadores a la vez
+        for (auto* peer : p2pPeers) {
+            sf::Socket::Status status = peer->send(packet);
+            if (status != sf::Socket::Status::Done) {
+                std::cout << "[P2P ERROR] Fallo al enviar paquete a la tuberia." << std::endl;
+            }
+        }
+    }
+
+
+    void SendMatchResult(const std::string& roomName, int first, int second, int third, int fourth) {
+        
+        socket.disconnect();
+        socket.setBlocking(true); 
+
+        
+        if (socket.connect(sf::IpAddress(127, 0, 0, 1), 55000) == sf::Socket::Status::Done) {
+            isConnected = true;
+
+            // enviamos el resultado numérico // comentarios debug con ia para ayuda
+            sf::Packet packet;
+            packet << static_cast<int>(PacketType::ReportResult) << roomName << first << second << third << fourth;
+
+            if (socket.send(packet) == sf::Socket::Status::Done) {
+                std::cout << "[CLIENTE] Resultado enviado (IDs: " << first << ", " << second << ", " << third << ", " << fourth << ")." << std::endl;
+            }
+        }
+        else {
+            std::cout << "[CLIENTE ERROR] No se pudo reconectar al servidor." << std::endl;
+        }
+
+        socket.setBlocking(false); 
+    }
+
+
+
+
+
+    // resetear partida anterior
+    void ResetP2P() {
+        for (auto* peer : p2pPeers) {
+            peer->disconnect();
+            delete peer;
+        }
+        p2pPeers.clear();
+        p2pListener.close();
+        incomingConnections = 0;
+
+        // Reseteamos las variables de partida
+        nextGameMyTurn = false;
+        nextGameOpponent = "";
+        nextGamePlayerID = INITIAL_TURN;
+
+        std::cout << "[CLIENTE] Conexiones P2P cerradas. Listo para nueva partida." << std::endl;
     }
 };

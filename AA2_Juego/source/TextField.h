@@ -31,13 +31,13 @@ public:
     }
 
     void Update() override {
-        float mx = (float)Input.GetMouseX();
-        float my = (float)Input.GetMouseY();
+        float mouseX = (float)Input.GetMouseX();
+        float mouseY = (float)Input.GetMouseY();
         bool currentClick = Input.GetLeftClick();
 
         if (currentClick && !prevLeftClick) {
-            isFocused = (mx >= transform->position.x && mx <= transform->position.x + size.x &&
-                my >= transform->position.y && my <= transform->position.y + size.y);
+            isFocused = (mouseX >= transform->position.x && mouseX <= transform->position.x + size.x &&
+                mouseY >= transform->position.y && mouseY <= transform->position.y + size.y);
 
             if (isFocused && content == "") visualText->SetText("");
         }
