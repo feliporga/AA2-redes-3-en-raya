@@ -8,15 +8,22 @@
 
 
 #define NM NetworkManager::Instance()
+
 #define NUM_ROWS 6
 #define NUM_COLS 6
 #define INITIAL_TURN 1
+
+#define SERVER_IP "127.0.0.1"
+
 #define PEER_PORT 55000
 class NetworkManager {
 private:
     sf::TcpSocket socket;
     sf::TcpListener p2pListener;
     std::vector<sf::TcpSocket*> p2pPeers;
+
+    std::string savedUser = "";
+    std::string savedPass = "";
 
     int incomingConnections = 0;
     bool isConnected = false;
@@ -68,6 +75,10 @@ public:
             std::cout << "[CLIENTE] No estas conectado al servidor." << std::endl;
             return;
         }
+
+        // GUARDAMOS LAS CREDENCIALES PARA EL AUTO-LOGIN
+        savedUser = username;
+        savedPass = password;
 
         sf::Packet packet;
         packet << static_cast<int>(PacketType::LoginRequest) << username << password;
@@ -290,7 +301,7 @@ public:
         socket.setBlocking(true); 
 
         
-        if (socket.connect(sf::IpAddress(127, 0, 0, 1), 55000) == sf::Socket::Status::Done) {
+        if (socket.connect(sf::IpAddress::resolve(SERVER_IP).value(), 55000) == sf::Socket::Status::Done) {
             isConnected = true;
 
             // enviamos el resultado numérico // comentarios debug con ia para ayuda
@@ -309,7 +320,28 @@ public:
     }
 
 
+    void LeaveMatchAndReconnect() {
+        ResetP2P();
 
+        // Nos reconectamos al servidor
+        socket.disconnect();
+        socket.setBlocking(true);
+
+        if (socket.connect(sf::IpAddress::resolve(SERVER_IP).value(), 55000) == sf::Socket::Status::Done) {
+            isConnected = true;
+            std::cout << "[CLIENTE] Reconectado al servidor principal. Autenticando..." << std::endl;
+
+            // Enviamos el Auto-Login
+            sf::Packet packet;
+            packet << static_cast<int>(PacketType::LoginRequest) << savedUser << savedPass;
+            socket.send(packet);
+        }
+        else {
+            std::cout << "[CLIENTE ERROR] No se pudo reconectar al servidor principal." << std::endl;
+        }
+
+        socket.setBlocking(false);
+    }
 
 
     // resetear partida anterior

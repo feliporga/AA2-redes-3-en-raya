@@ -66,6 +66,13 @@ void TicTacToe::HandleInput() {
         float mouseX = (float)Input.GetMouseX();
         float mouseY = (float)Input.GetMouseY();
 
+        if (mouseX >= 50 && mouseX <= 260 && mouseY >= 50 && mouseY <= 100) {
+            std::cout << "[GAME] Abanadonando la partida..." << std::endl;
+            NM.LeaveMatchAndReconnect();
+            SM.SetNextScene("MainMenu");
+            return;
+        }
+
         if (mouseX >= startX && mouseX <= startX + 600 && mouseY >= startY && mouseY <= startY + 600) {
             int col = (int)((mouseX - startX) / cellSize);
             int row = (int)((mouseY - startY) / cellSize);
@@ -211,7 +218,7 @@ void TicTacToe::OnEnter() {
     }
     SPAWN.SpawnObject(statusText);
 
-    backButton = new Button(Vector2(50, 50), Vector2(210, 50), sf::Color(255, 0, 255, 255), "", Button::ActionType::ChangeScene, "MainMenu");
+    backButton = new Button(Vector2(50, 50), Vector2(210, 50), sf::Color(255, 0, 255, 255), "", Button::ActionType::None);
     SPAWN.SpawnObject(backButton);
 
     backButtonText = new TextObject("VOLVER");

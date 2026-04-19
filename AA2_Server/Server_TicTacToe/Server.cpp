@@ -186,18 +186,50 @@ void Server::HandleClientPackets() {
                         packet >> user >> pass;
                         std::cout << "[SERVER] Peticion de Login -> Usuario: " << user << std::endl;
 
-                        bool isValid = CheckUserLogin(user, pass);
+                        // --- 1. COMPROBACIÓN DE USUARIO YA CONECTADO ---
+                        bool alreadyLoggedIn = false;
+                        for (const auto& pair : loggedInUsers) {
+                            // Convertimos a minúsculas para que "Felip" y "felip" cuenten como el mismo
+                            std::string connectedUser = pair.second;
+                            std::string incomingUser = user;
+
+                            if (connectedUser.size() == incomingUser.size()) {
+                                bool match = true;
+                                for (size_t i = 0; i < connectedUser.size(); ++i) {
+                                    if (std::tolower(connectedUser[i]) != std::tolower(incomingUser[i])) {
+                                        match = false;
+                                        break;
+                                    }
+                                }
+                                if (match) {
+                                    alreadyLoggedIn = true;
+                                    break;
+                                }
+                            }
+                        }
 
                         sf::Packet response;
-                        if (isValid) {
-                            std::cout << "[SERVER] Login correcto." << std::endl;
-                            loggedInUsers[client] = user;
-                            response << static_cast<int>(PacketType::LoginSuccess);
-                        }
-                        else {
-                            std::cout << "[SERVER] Login incorrecto." << std::endl;
+
+						// Checkear si ya hay un usuario con el mismo nombre conectado (ignorando mayúsculas/minúsculas)
+
+                        if (alreadyLoggedIn) {
+                            std::cout << "[SERVER] Login rechazado. El usuario ya esta jugando en otro PC." << std::endl;
                             response << static_cast<int>(PacketType::LoginFailed);
                         }
+                        else {
+                            bool isValid = CheckUserLogin(user, pass);
+
+                            if (isValid) {
+                                std::cout << "[SERVER] Login correcto." << std::endl;
+                                loggedInUsers[client] = user;
+                                response << static_cast<int>(PacketType::LoginSuccess);
+                            }
+                            else {
+                                std::cout << "[SERVER] Login incorrecto." << std::endl;
+                                response << static_cast<int>(PacketType::LoginFailed);
+                            }
+                        }
+
                         client->send(response);
                     }
                     else if (type == PacketType::RegisterRequest) {
