@@ -406,6 +406,46 @@ void Server::HandleJoinRoom(sf::TcpSocket* client, const std::string& roomName) 
                     std::vector<PeerData> peers;
                     for (int i = 0; i < room.players.size(); i++) {
                         peers.push_back({ i + 1, room.players[i]->getRemoteAddress().value().toString(), static_cast<unsigned short>(PORT + i) });
+                    
+                        sf::TcpSocket* targetSocket = room.players[i];
+
+                        std::string currentPeerName = loggedInUsers[targetSocket];
+                        int currentPeerScore = 0;
+                        
+                        //Consulta a la BDD
+                        std::string query = "SELECT points FROM users WHERE userName = '" + currentPeerName + "'";
+
+                        try {
+                            sql::PreparedStatement* pstmt = con->prepareStatement("SELECT pts FROM usuarios WHERE username = ?");
+
+                            pstmt->setString(1, currentPeerName);
+
+                            sql::ResultSet* res = pstmt->executeQuery();
+
+                            if (res->next()) {
+                                // Sacamos el valor entero de la columna llamada "pts"
+                                currentPeerScore = res->getInt("pts");
+                            }
+
+                            // 5. ¡Limpiamos la memoria!
+                            delete res;
+                            delete pstmt;
+
+                        }
+                        catch (sql::SQLException& e) {
+                            // Si la base de datos falla, el servidor no crashea, solo avisa
+                            std::cout << "[SERVER ERROR DB] Fallo al buscar a " << currentPeerName << ": " << e.what() << std::endl;
+                        }
+
+                        PeerData currentPeer = {
+                            i + 1, 
+                            targetSocket->getRemoteAddress().value().toString(), 
+                            static_cast<unsigned short>(54000 + i), 
+                            currentPeerName, 
+                            currentPeerScore 
+                        };
+
+                        peers.push_back(currentPeer);
                     }
 
                     for (int i = 0; i < room.players.size(); i++) {
@@ -413,7 +453,8 @@ void Server::HandleJoinRoom(sf::TcpSocket* client, const std::string& roomName) 
                         startPacket << static_cast<int>(PacketType::GameStart);
                         startPacket << peers[i].id;
                         startPacket << peers[i].port;
-                        startPacket << static_cast<int>(3); // N�mero de oponentes
+                        startPacket << static_cast<int>(3); // Numero de oponentes
+                        startPacket << peers[i].name << peers[i].score;
 
                         for (int j = 0; j < room.players.size(); j++) {
                             if (i != j) {
@@ -421,9 +462,7 @@ void Server::HandleJoinRoom(sf::TcpSocket* client, const std::string& roomName) 
                             }
                         }
 
-                        (void)room.players[i]->send(startPacket);
-
-                       
+                        (void)room.players[i]->send(startPacket);                
                     }
 
                     // Limpiamos la sala 

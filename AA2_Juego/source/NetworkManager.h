@@ -160,10 +160,16 @@ public:
             {
                 int myID;
                 unsigned short myPort;
+                std::string myName;
+                int myScore;
                 int numPeers;
+               
+                packet >> myID >> myPort >> myName >> myScore >> numPeers;
 
-                packet >> myID >> myPort >> numPeers;
-
+                PlayerRecord me;
+                me.name = myName;
+                me.pts = myScore;
+                playersInMatch[myID] = me;
 
                 this->nextGameMyTurn = (myID == 1); 
                 this->nextGameOpponent = "Jugadores P2P";
@@ -171,14 +177,14 @@ public:
 
 
                 socket.disconnect();
-                std::cout << "\n[CLIENTE] Bootstrap completado. Mi ID P2P es: " << myID << std::endl;
+                std::cout << "[CLIENTE] Bootstrap completado. Mi ID P2P es: " << myID << std::endl;
 
                 incomingConnections = 4 - myID;
 
                 if (incomingConnections > 0) {
                     p2pListener.setBlocking(false);
                     p2pListener.listen(myPort);
-                    std::cout << "[P2P] Escuchando en el puerto " << myPort << " a " << incomingConnections << " companeros..." << std::endl;
+                    std::cout << "[P2P] Escuchando en el puerto " << myPort << " a " << incomingConnections << " oponentes..." << std::endl;
                 }
 
                 for (int i = 0; i < numPeers; i++) {

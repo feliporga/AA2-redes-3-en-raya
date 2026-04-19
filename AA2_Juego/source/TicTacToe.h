@@ -5,7 +5,7 @@
 #include "PlayerPiece.h"
 #include <string>
 #include <vector>
-
+#define INITIAL_TIMER 20.0f
 class TicTacToe : public Scene {
 private:
     int board[6][6];
@@ -45,6 +45,9 @@ private:
 
 
 public:
+    bool isMyTurn = false;
+    int myPlayerID = 1;
+    std::string opponentName = "";
 
     TicTacToe();
     ~TicTacToe() = default;
@@ -54,10 +57,8 @@ public:
     void Update() override;
     void Render() override;
 
-    bool isMyTurn = false;
-    int myPlayerID = 1;
-    std::string opponentName = "";
-
+    
+    void SetTimer();
     void ApplyMoveFromServer(int row, int col, int playerMoved, int nextPlayerturn);
     bool IsMyTurn(int nextPlayerTurn);
 };

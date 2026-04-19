@@ -19,7 +19,11 @@ std::string TicTacToe::GetPlayerName(int player) {
     if (player == 2) return "JUGADOR 2 (TRIANGULO)";
     if (player == 3) return "JUGADOR 3 (CIRCULO)";
     if (player == 4) return "JUGADOR 4 (CRUZ)";
-    return " ";
+    //for (auto const [id, record] : NM.playersInMatch) {
+    //    std::string textToDisplay = record.name + " - " + std::to_string(record.pts) + " pts";
+    //    return textToDisplay;
+    //}
+    //return " ";
 }
 
 bool TicTacToe::CheckWin(int p) {
@@ -103,7 +107,7 @@ bool TicTacToe::IsMyTurn(int nextPlayerTurn) {
 void TicTacToe::ApplyMoveFromServer(int row, int col, int playerWhoMoved, int nextPlayerTurn) {
 
     // Resetear el cronómetro 
-    turnTimer = 20.0f;
+    turnTimer = INITIAL_TIMER;
 
     //Movimiento time out
     if (row == -1 && col == -1) {
@@ -164,7 +168,14 @@ void TicTacToe::ApplyMoveFromServer(int row, int col, int playerWhoMoved, int ne
         }
     }
 }
+void TicTacToe::SetTimer() {
+    turnTimer = INITIAL_TIMER;
+    timerText = new TextObject("TIEMPO: " + std::to_string((int)turnTimer));
 
+    timerText->GetTransform()->position = Vector2(RM->WINDOW_WIDTH / 2 - 60, 720.0f);
+    timerText->SetColor(sf::Color::Red);
+    SPAWN.SpawnObject(timerText);
+}
 void TicTacToe::OnEnter() {
     isMyTurn = NM.nextGameMyTurn;
     opponentName = NM.nextGameOpponent;
@@ -190,26 +201,27 @@ void TicTacToe::OnEnter() {
     }
 
     //timer logica
-    turnTimer = 20.0f;
-    timerText = new TextObject("TIEMPO: 20");
-  
-    timerText->GetTransform()->position = Vector2(RM->WINDOW_WIDTH / 2 - 60, 720.0f);
-    timerText->SetColor(sf::Color::Red);
-    SPAWN.SpawnObject(timerText);
+	SetTimer();
 
+    for(auto const [id, record] : NM.playersInMatch) {
+		std::string textToDisplay = record.name + " - " + std::to_string(record.pts) + " pts";
+        statusText = new TextObject("TURNO: " + textToDisplay);
+        statusText->GetTransform()->position = Vector2(RM->WINDOW_WIDTH / 2 - 200, 30);
 
-    statusText = new TextObject("TURNO: " + GetPlayerName(currentPlayer));
-    statusText->GetTransform()->position = Vector2(RM->WINDOW_WIDTH / 2 - 200, 30);
-
-    if (myPlayerID == currentPlayer) {
-        statusText->SetText("TU TURNO");
-        statusText->SetColor(sf::Color::Green);
-    }
-    else {
-        statusText->SetText("TURNO: " + GetPlayerName(currentPlayer));
-        statusText->SetColor(sf::Color::White);
+        if (myPlayerID == currentPlayer) {
+            statusText->SetText("TU TURNO");
+            statusText->SetColor(sf::Color::Green);
+        }
+        else {
+            statusText->SetText("TURNO: " + /*GetPlayerName(currentPlayer)*/textToDisplay);
+            statusText->SetColor(sf::Color::White);
+        }
+       
     }
     SPAWN.SpawnObject(statusText);
+    
+
+    
 
     backButton = new Button(Vector2(50, 50), Vector2(210, 50), sf::Color(255, 0, 255, 255), "", Button::ActionType::ChangeScene, "MainMenu");
     SPAWN.SpawnObject(backButton);
@@ -258,7 +270,7 @@ void TicTacToe::Update() {
         }
 
         if (turnTimer <= 0.0f) {
-            turnTimer = 20.0f;
+            turnTimer = INITIAL_TIMER;
             std::cout << "[GAME] Tiempo agotado para el Jugador " << currentPlayer << ". Saltando turno..." << std::endl;
 
             int nextTurn = currentPlayer;
