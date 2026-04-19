@@ -5,6 +5,8 @@
 #include "NetworkProtocol.h"
 #include "SceneManager.h"
 #include "TicTacToe.h"
+#define SERVER_IP 188,84,43,62
+#define SERVER_PORT 55000
 
 
 #define NM NetworkManager::Instance()
@@ -290,7 +292,7 @@ public:
         socket.setBlocking(true); 
 
         
-        if (socket.connect(sf::IpAddress(127, 0, 0, 1), 55000) == sf::Socket::Status::Done) {
+        if (socket.connect(sf::IpAddress(SERVER_IP), SERVER_PORT) == sf::Socket::Status::Done) {
             isConnected = true;
 
             // enviamos el resultado numérico // comentarios debug con ia para ayuda
@@ -307,10 +309,6 @@ public:
 
         socket.setBlocking(false); 
     }
-
-
-
-
 
     // resetear partida anterior
     void ResetP2P() {

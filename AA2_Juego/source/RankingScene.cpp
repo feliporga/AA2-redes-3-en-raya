@@ -54,29 +54,29 @@ void RankingScene::OnEnter() {
 
     headerName = new TextObject("NOMBRE");
     headerName->GetTransform()->position = Vector2(winW * 0.15f, headerY);
-    headerName->SetColor(sf::Color(200, 200, 200, 255));
+    headerName->SetColor(TEXT_COLOR);
     SPAWN.SpawnObject(headerName);
 
     headerWins = new TextObject("VICTORIAS");
     headerWins->GetTransform()->position = Vector2(winW * 0.45f, headerY);
-    headerWins->SetColor(sf::Color(200, 200, 200, 255));
+    headerWins->SetColor(TEXT_COLOR);
     SPAWN.SpawnObject(headerWins);
 
     headerLosses = new TextObject("DERROTAS");
     headerLosses->GetTransform()->position = Vector2(winW * 0.65f, headerY);
-    headerLosses->SetColor(sf::Color(200, 200, 200, 255));
+    headerLosses->SetColor(TEXT_COLOR);
     SPAWN.SpawnObject(headerLosses);
 
     headerElo = new TextObject("ELO");
     headerElo->GetTransform()->position = Vector2(winW * 0.85f, headerY);
-    headerElo->SetColor(sf::Color(200, 200, 200, 255));
+    headerElo->SetColor(TEXT_COLOR);
     SPAWN.SpawnObject(headerElo);
 
-    backButton = new Button(Vector2(50, 50), Vector2(210, 50), sf::Color(0, 100, 200, 255), "", Button::ActionType::ChangeScene, "MainMenu");
+    backButton = new Button(BUTTON_POSITION, BUTTON_SIZE, BUTTON_COLOR, "", Button::ActionType::ChangeScene, "MainMenu");
     SPAWN.SpawnObject(backButton);
 
     backButtonText = new TextObject("VOLVER");
-    backButtonText->GetTransform()->position = Vector2(75.0f, 60.0f);
+    backButtonText->GetTransform()->position = Vector2(BUTTON_POSITION.x + 25.0f, BUTTON_POSITION.y + 10.0f);
     SPAWN.SpawnObject(backButtonText);
 
     NM.newRankingAvailable = false;

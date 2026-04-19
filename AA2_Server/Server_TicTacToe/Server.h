@@ -21,6 +21,10 @@
 #define USER "root"
 #define PSSWRD "enti"
 #define DBNAME "tictactoe_db"
+#define MAX_POINTS 30
+#define MIN_POINTS 15
+#define INCREMENT 1
+#define OPPONENT_NUM 3
 class Server {
 private:
     unsigned short port;

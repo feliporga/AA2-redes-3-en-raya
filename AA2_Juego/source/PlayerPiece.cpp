@@ -17,9 +17,9 @@ PlayerPiece::PlayerPiece(int player, const Vector2& position)
     std::string path = GetSpritePath(player);
     RM->LoadTexture(path);
 
-    renderer = new ImageRenderer(transform, path, Vector2(0.0f, 0.0f), Vector2(293.0f, 293.0f));
+    renderer = new ImageRenderer(transform, path, Vector2(0.0f, 0.0f), Vector2(PIECE_SIZE, PIECE_SIZE));
 
-    transform->size = Vector2(293.0f, 293.0f);
+    transform->size = Vector2(PIECE_SIZE, PIECE_SIZE);
 
-    transform->scale = Vector2(100.0f / 293.0f, 100.0f / 293.0f);
+    transform->scale = Vector2(100.0f / PIECE_SIZE, 100.0f / PIECE_SIZE);
 }

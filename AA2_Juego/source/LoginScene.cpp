@@ -22,15 +22,13 @@ LoginScene::LoginScene() : Scene() {
 }
 
 void LoginScene::OnEnter() {
-    AM.SetMusicVolume(10.0f);
-    //AM.PlaySong("menuMusic");
 
+	//INICIALIZACIÓN DE OBJETOS UI
     titleText = new TextObject("3 EN RAYA ONLINE");
     titleText->GetTransform()->position = Vector2(winW / 2 - 190.0f, winH / 2 - 200);
     titleText->SetColor(sf::Color::Yellow);
     SPAWN.SpawnObject(titleText);
 
-    // input fields setup
     userField = new TextField(Vector2(winW / 2 - 200, winH / 2 - 100), Vector2(400, 45));
     passField = new TextField(Vector2(winW / 2 - 200, winH / 2 - 20), Vector2(400, 45));
     SPAWN.SpawnObject(userField);
@@ -44,14 +42,12 @@ void LoginScene::OnEnter() {
     passLabel->GetTransform()->position = Vector2(winW / 2 - 115, winH / 2 - 50);
     SPAWN.SpawnObject(passLabel);
 
-    // ActionType::None allows manual click handling in Update
-    btnLogin = new Button(Vector2(winW / 2 - 125, winH / 2 + 60), Vector2(250, 45), sf::Color(0, 100, 200, 255), "", Button::ActionType::None);
-    btnRegister = new Button(Vector2(winW / 2 - 125, winH / 2 + 120), Vector2(250, 45), sf::Color(0, 150, 0, 255), "", Button::ActionType::None);
+    btnLogin = new Button(Vector2(winW / 2 - 125, winH / 2 + 60), Vector2(BTN_WIDTH, BTN_HEIGHT), COLOR_LOGIN, "", Button::ActionType::None);
+    btnRegister = new Button(Vector2(winW / 2 - 125, winH / 2 + 120), Vector2(BTN_WIDTH, BTN_HEIGHT), COLOR_REGISTER, "", Button::ActionType::None);
 
     SPAWN.SpawnObject(btnLogin);
     SPAWN.SpawnObject(btnRegister);
 
-    // Visual labels for the buttons
     btnLoginText = new TextObject("LOGIN");
     btnLoginText->GetTransform()->position = Vector2(winW / 2 - 60.0f, winH / 2 + 70);
     SPAWN.SpawnObject(btnLoginText);
@@ -77,8 +73,8 @@ void LoginScene::Update() {
         float mouseY = (float)Input.GetMouseY();
 
         float btnX = winW / 2 - 125;
-        float btnW = 250;
-        float btnH = 45;
+        float btnW = BTN_WIDTH;
+        float btnH = BTN_HEIGHT;
 
         // Login button hitbox and network request
         float loginY = winH / 2 + 60;

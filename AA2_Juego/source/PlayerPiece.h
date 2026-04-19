@@ -3,7 +3,7 @@
 #include "ImageRenderer.h"
 #include "Vector2.h"
 #include <string>
-
+#define PIECE_SIZE 293.0f
 class PlayerPiece : public Object {
 private:
     int playerID;

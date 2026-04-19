@@ -244,14 +244,6 @@ void Server::HandleClientPackets() {
                         std::vector<int> finalStandings = { p1, p2, p3, p4 };
                         HandleMatchResult(client, roomName, finalStandings);
                     }
-
-                   /* else if (type == PacketType::GameMove) {
-                        int row = 0;
-                        int col = 0;
-                        packet >> row >> col;
-                        std::cout << "[SERVER] " << loggedInUsers[client] << " ha intentado mover en Fila: " << row << ", Columna: " << col << std::endl;
-                        HandleGameMove(client, row, col);
-                    }*/
                 }
                 ++it;
             }
@@ -383,7 +375,7 @@ void Server::HandleJoinRoom(sf::TcpSocket* client, const std::string& roomName) 
                     OngoingMatch newMatch;
                     newMatch.roomName = room.name;
 
-                    // Guardamos los nombres reales en orden (ID 1 = pos 0, ID 2 = pos 1...)
+                    // Guardamos los nombres reales en orden 
                     for (auto* p : room.players) {
                         newMatch.realNames.push_back(loggedInUsers[p]);
                     }
@@ -413,7 +405,7 @@ void Server::HandleJoinRoom(sf::TcpSocket* client, const std::string& roomName) 
                         startPacket << static_cast<int>(PacketType::GameStart);
                         startPacket << peers[i].id;
                         startPacket << peers[i].port;
-                        startPacket << static_cast<int>(3); // N�mero de oponentes
+                        startPacket << static_cast<int>(OPPONENT_NUM); 
 
                         for (int j = 0; j < room.players.size(); j++) {
                             if (i != j) {
@@ -470,10 +462,10 @@ void Server::HandleMatchResult(sf::TcpSocket* client, const std::string& roomNam
                 std::string loser3 = it->realNames[placements[2] - 1];
                 std::string loser4 = it->realNames[placements[3] - 1];
 
-                UpdatePlayerStats(winner1, 30, 1, 0);
-                UpdatePlayerStats(winner2, 15, 1, 0);
-                UpdatePlayerStats(loser3, -15, 0, 1);
-                UpdatePlayerStats(loser4, -30, 0, 1);
+                UpdatePlayerStats(winner1, MAX_POINTS, INCREMENT, 0);
+                UpdatePlayerStats(winner2, MIN_POINTS, INCREMENT, 0);
+                UpdatePlayerStats(loser3, -MIN_POINTS, 0, INCREMENT);
+                UpdatePlayerStats(loser4, -MAX_POINTS, 0, INCREMENT);
 
                 activeMatches.erase(it);
                 return;
@@ -512,37 +504,3 @@ void Server::UpdatePlayerStats(const std::string& user, int pointsOffset, int wi
         std::cout << "[BD] Error actualizando stats: " << e.what() << std::endl;
     }
 }
-
-
-//void Server::HandleGameMove(sf::TcpSocket* client, int row, int col) {
-//    // Buscamos en qu� sala est� este cliente
-//    for (auto& room : activeRooms) {
-//        if (room.player1 == client || room.player2 == client) {
-//
-//            int playerID = (room.player1 == client) ? 1 : 2;
-//
-//            // 1. Validar que sea su turno
-//            if (room.currentTurn != playerID) return;
-//
-//            // 2. Validar que la casilla est� vac�a
-//            if (room.board[row][col] != 0) return;
-//
-//            // 3. Aplicar el movimiento en el servidor
-//            room.board[row][col] = playerID;
-//
-//            // 4. Cambiar el turno
-//            room.currentTurn = (playerID == 1) ? 2 : 1;
-//
-//            // 5. Avisar a AMBOS jugadores del movimiento y de qui�n le toca ahora
-//            sf::Packet p1Packet, p2Packet;
-//
-//            p1Packet << static_cast<int>(PacketType::UpdateBoard) << row << col << playerID << (room.currentTurn == 1);
-//            p2Packet << static_cast<int>(PacketType::UpdateBoard) << row << col << playerID << (room.currentTurn == 2);
-//
-//            (void)room.player1->send(p1Packet);
-//            (void)room.player2->send(p2Packet);
-//
-//            return;
-//        }
-//    }
-//}
