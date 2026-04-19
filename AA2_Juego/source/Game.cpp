@@ -12,7 +12,7 @@
 
 
 void Game::Init() {
-    NM.ConnectToServer("127.0.0.1", 55000);
+    NM.ConnectToServer(SERVER_IP, 55000);
     RM->Init();
 
     AM.LoadSong("menuMusic");
