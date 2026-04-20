@@ -10,9 +10,6 @@
 #include "RankingScene.h"
 #include "GameOverScene.h"
 
-#define SERVER_IP "127.0.0.1"
-#define SERVER_PORT 55000
-
 void Game::Init() {
     NM.ConnectToServer(SERVER_IP, SERVER_PORT);
     RM->Init();

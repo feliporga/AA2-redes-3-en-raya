@@ -5,7 +5,8 @@
 #include "NetworkProtocol.h"
 #include "SceneManager.h"
 #include "TicTacToe.h"
-#define SERVER_IP 188,84,43,62
+
+#define SERVER_IP "127.0.0.1"
 #define SERVER_PORT 55000
 
 
@@ -15,9 +16,6 @@
 #define NUM_COLS 6
 #define INITIAL_TURN 1
 
-#define SERVER_IP "127.0.0.1"
-
-#define PEER_PORT 55000
 class NetworkManager {
 private:
     sf::TcpSocket socket;
