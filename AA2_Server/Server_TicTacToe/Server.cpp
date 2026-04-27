@@ -248,7 +248,7 @@ void Server::HandleClientPackets() {
                             std::cout << "[SERVER] Registro fallido (el usuario ya existe)." << std::endl;
                             response << static_cast<int>(PacketType::RegisterFailed);
                         }
-                        (void)client->send(response);
+                        client->send(response);
                     }
                     else if (type == PacketType::RankingRequest) {
                         std::cout << "[SERVER] " << loggedInUsers[client] << " ha pedido el Ranking." << std::endl;
@@ -353,6 +353,7 @@ void Server::SendRankingToClient(sf::TcpSocket* client) {
     }
 }
 
+
 void Server::Stop() {
     isRunning = false;
     listener.close();
@@ -371,7 +372,7 @@ void Server::HandleCreateRoom(sf::TcpSocket* client, const std::string& roomName
         if (room.name == roomName) {
             sf::Packet response;
             response << static_cast<int>(PacketType::RoomError);
-            (void)client->send(response);
+            client->send(response);
             return;
         }
     }
@@ -385,7 +386,7 @@ void Server::HandleCreateRoom(sf::TcpSocket* client, const std::string& roomName
 
     sf::Packet response;
     response << static_cast<int>(PacketType::RoomSuccess);
-    (void)client->send(response);
+    client->send(response);
 }
 
 void Server::HandleJoinRoom(sf::TcpSocket* client, const std::string& roomName) {
@@ -398,7 +399,7 @@ void Server::HandleJoinRoom(sf::TcpSocket* client, const std::string& roomName) 
 
                 sf::Packet successResponse;
                 successResponse << static_cast<int>(PacketType::RoomSuccess);
-                (void)client->send(successResponse);
+                client->send(successResponse);
 
                 if (room.players.size() == 4) {
                     std::cout << "[SERVER] Sala llena, iniciando emparejamiento..." << std::endl;
@@ -445,7 +446,7 @@ void Server::HandleJoinRoom(sf::TcpSocket* client, const std::string& roomName) 
                             }
                         }
 
-                        (void)room.players[i]->send(startPacket);
+                        room.players[i]->send(startPacket);
 
                        
                     }
@@ -458,7 +459,7 @@ void Server::HandleJoinRoom(sf::TcpSocket* client, const std::string& roomName) 
             else {
                 sf::Packet response;
                 response << static_cast<int>(PacketType::RoomError);
-                (void)client->send(response);
+                client->send(response);
                 return;
             }
         }
@@ -466,7 +467,7 @@ void Server::HandleJoinRoom(sf::TcpSocket* client, const std::string& roomName) 
 
     sf::Packet response;
     response << static_cast<int>(PacketType::RoomError);
-    (void)client->send(response);
+    client->send(response);
 }
 
 
