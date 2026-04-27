@@ -47,14 +47,14 @@ private:
         sf::TcpSocket* player1 = nullptr;
         sf::TcpSocket* player2 = nullptr; 
         std::vector<sf::TcpSocket*> players;
-        int board[NUM_ROWS][NUM_COLS]; // Tablero de 6x6 vacío
-        int currentTurn = INITIAL_TURN;   
+        short board[NUM_ROWS][NUM_COLS]; // Tablero de 6x6 vacío
+        short currentTurn = INITIAL_TURN;   
     };
 
 
     //SISTEMA DE RESULTADOS
     struct MatchResult {
-        std::vector<int> placements; // IDs de los jugadores
+        std::vector<short> placements; // IDs de los jugadores
     };
 
     struct OngoingMatch {
@@ -66,8 +66,8 @@ private:
     std::vector<OngoingMatch> activeMatches;
 
     
-    void HandleMatchResult(sf::TcpSocket* client, const std::string& roomName, const std::vector<int>& placements);
-    void UpdatePlayerStats(const std::string& user, int pointsOffset, int winOffset, int lossOffset);
+    void HandleMatchResult(sf::TcpSocket* client, const std::string& roomName, const std::vector<short>& placements);
+    void UpdatePlayerStats(const std::string& user, short pointsOffset, short winOffset, short lossOffset);
 
     std::vector<Room> activeRooms;
 

@@ -4,6 +4,7 @@
 #include "NetworkManager.h"
 #include "Spawner.h"
 
+
 TicTacToe::TicTacToe() : Scene() {
     startX = STARTX;
     startY = STARTY;
@@ -14,7 +15,7 @@ TicTacToe::TicTacToe() : Scene() {
     backButtonText = nullptr;
 }
 
-std::string TicTacToe::GetPlayerName(int player) {
+std::string TicTacToe::GetPlayerName(short player) {
     if (player == 1) return "JUGADOR 1 (CUADRADO)";
     if (player == 2) return "JUGADOR 2 (TRIANGULO)";
     if (player == 3) return "JUGADOR 3 (CIRCULO)";
@@ -22,28 +23,28 @@ std::string TicTacToe::GetPlayerName(int player) {
     return " ";
 }
 
-bool TicTacToe::CheckWin(int p) {
+bool TicTacToe::CheckWin(short p) {
     // Horizontales
-    for (int r = 0; r < 6; r++) {
-        for (int c = 0; c < 4; c++) {
+    for (short r = 0; r < 6; r++) {
+        for (short c = 0; c < 4; c++) {
             if (board[r][c] == p && board[r][c + 1] == p && board[r][c + 2] == p) return true;
         }
     }
     // Verticales
-    for (int c = 0; c < 6; c++) {
-        for (int r = 0; r < 4; r++) {
+    for (short c = 0; c < 6; c++) {
+        for (short r = 0; r < 4; r++) {
             if (board[r][c] == p && board[r + 1][c] == p && board[r + 2][c] == p) return true;
         }
     }
     // Diagonales principales (\)
-    for (int r = 0; r < 4; r++) {
-        for (int c = 0; c < 4; c++) {
+    for (short r = 0; r < 4; r++) {
+        for (short c = 0; c < 4; c++) {
             if (board[r][c] == p && board[r + 1][c + 1] == p && board[r + 2][c + 2] == p) return true;
         }
     }
     // Diagonales inversas (/)
-    for (int r = 0; r < 4; r++) {
-        for (int c = 2; c < 6; c++) {
+    for (short r = 0; r < 4; r++) {
+        for (short c = 2; c < 6; c++) {
             if (board[r][c] == p && board[r + 1][c - 1] == p && board[r + 2][c - 2] == p) return true;
         }
     }
@@ -74,14 +75,14 @@ void TicTacToe::HandleInput() {
         }
 
         if (mouseX >= startX && mouseX <= startX + 600 && mouseY >= startY && mouseY <= startY + 600) {
-            int col = (int)((mouseX - startX) / cellSize);
-            int row = (int)((mouseY - startY) / cellSize);
+            short col = (short)((mouseX - startX) / cellSize);
+            short row = (short)((mouseY - startY) / cellSize);
 
             if (currentPlayer == myPlayerID && board[row][col] == 0) {
 
                 
                 // Saltarse quien esta en el podio // ayuda ia comentarios para debug
-                int nextTurn = myPlayerID;
+                short nextTurn = myPlayerID;
                 do {
                     nextTurn = (nextTurn % 4) + 1;
                 } while (std::find(podium.begin(), podium.end(), nextTurn) != podium.end() && podium.size() < 3);
@@ -103,11 +104,11 @@ void TicTacToe::HandleInput() {
     }
 }
 
-bool TicTacToe::IsMyTurn(int nextPlayerTurn) {
+bool TicTacToe::IsMyTurn(short nextPlayerTurn) {
     return myPlayerID == nextPlayerTurn;
 }
 
-void TicTacToe::ApplyMoveFromServer(int row, int col, int playerWhoMoved, int nextPlayerTurn) {
+void TicTacToe::ApplyMoveFromServer(short row, short col, short playerWhoMoved, short nextPlayerTurn) {
 
     // Resetear el cron�metro 
     turnTimer = INITIAL_TIMER;
@@ -189,8 +190,8 @@ void TicTacToe::OnEnter() {
 
     movesCount = 0;
 
-    for (int r = 0; r < 6; r++) {
-        for (int c = 0; c < 6; c++) {
+    for (short r = 0; r < 6; r++) {
+        for (short c = 0; c < 6; c++) {
             board[r][c] = 0;
             cellSprites[r][c] = nullptr;
         }
@@ -198,7 +199,7 @@ void TicTacToe::OnEnter() {
 
     //timer logica
     turnTimer = INITIAL_TIMER;
-    timerText = new TextObject("TIEMPO: " + std::to_string((int)INITIAL_TIMER));
+    timerText = new TextObject("TIEMPO: " + std::to_string((short)INITIAL_TIMER));
   
     timerText->GetTransform()->position = Vector2(RM->WINDOW_WIDTH / 2 - 60, 720.0f);
     timerText->SetColor(sf::Color::Red);
@@ -260,7 +261,8 @@ void TicTacToe::Update() {
         turnTimer -= TIME.GetDeltaTime();
 
         if (timerText) {
-            int secondsLeft = std::max(0, (int)std::ceil(turnTimer));
+
+            short secondsLeft = (short)std::max(0.0f, std::ceil(turnTimer)); // Change the first argument to 0.0 to match the type of the second argument
             timerText->SetText("TIEMPO: " + std::to_string(secondsLeft));
         }
 
@@ -268,7 +270,7 @@ void TicTacToe::Update() {
             turnTimer = 20.0f;
             std::cout << "[GAME] Tiempo agotado para el Jugador " << currentPlayer << ". Saltando turno..." << std::endl;
 
-            int nextTurn = currentPlayer;
+            short nextTurn = currentPlayer;
             do {
                 nextTurn = (nextTurn % 4) + 1;
             } while (std::find(podium.begin(), podium.end(), nextTurn) != podium.end() && podium.size() < 3);
@@ -283,9 +285,9 @@ void TicTacToe::Update() {
 void TicTacToe::Render() {
     Scene::Render();
 
-    for (int i = 0; i <= 6; i++) {
-        RM->DrawRect((int)(startX + i * cellSize), (int)startY, 4, 600, 255, 255, 255, 255);
-        RM->DrawRect((int)startX, (int)(startY + i * cellSize), 600, 4, 255, 255, 255, 255);
+    for (short i = 0; i <= 6; i++) {
+        RM->DrawRect((short)(startX + i * cellSize), (short)startY, 4, 600, 255, 255, 255, 255);
+        RM->DrawRect((short)startX, (short)(startY + i * cellSize), 600, 4, 255, 255, 255, 255);
     }
 }
 
@@ -299,8 +301,8 @@ void TicTacToe::CheckAndSendResults() {
         hasSentResult = true;
 
         // No podio = pierde
-        int loserID = 0;
-        for (int i = 1; i <= 4; i++) {
+        short loserID = 0;
+        for (short i = 1; i <= 4; i++) {
             if (std::find(podium.begin(), podium.end(), i) == podium.end()) {
                 loserID = i;
                 break;

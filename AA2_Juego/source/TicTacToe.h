@@ -18,11 +18,11 @@
 #define BUTTON_SIZE Vector2(210.0f, 50.0f)
 class TicTacToe : public Scene {
 private:
-    int board[BOARD_SIZE][BOARD_SIZE];
-    int currentPlayer;
+    short board[BOARD_SIZE][BOARD_SIZE];
+    short currentPlayer;
     bool gameOver;
     bool mouseHeld;
-    int movesCount;
+    short movesCount;
 
     float startX;
     float startY;
@@ -40,8 +40,8 @@ private:
     Button* backButton;
     TextObject* backButtonText;
 
-    std::string GetPlayerName(int player);
-    bool CheckWin(int p);
+    std::string GetPlayerName(short player);
+    bool CheckWin(short p);
     void HandleInput();
 
 
@@ -65,9 +65,9 @@ public:
     void Render() override;
 
     bool isMyTurn = false;
-    int myPlayerID = 1;
+    short myPlayerID = 1;
     std::string opponentName = "";
 
-    void ApplyMoveFromServer(int row, int col, int playerMoved, int nextPlayerturn);
-    bool IsMyTurn(int nextPlayerTurn);
+    void ApplyMoveFromServer(short row, short col, short playerMoved, short nextPlayerturn);
+    bool IsMyTurn(short nextPlayerTurn);
 };

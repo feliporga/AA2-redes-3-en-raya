@@ -25,7 +25,7 @@ private:
     std::string savedUser = "";
     std::string savedPass = "";
 
-    int incomingConnections = 0;
+    short incomingConnections = 0;
     bool isConnected = false;
 
     NetworkManager() {
@@ -35,7 +35,7 @@ private:
 public:
     bool nextGameMyTurn = false;
     std::string nextGameOpponent = "";
-    int nextGamePlayerID = INITIAL_TURN;
+    short nextGamePlayerID = INITIAL_TURN;
     static NetworkManager& Instance() {
         static NetworkManager instance;
         return instance;
@@ -44,13 +44,13 @@ public:
 
     // Estructura para guardar los datos del ranking temporalmente
     struct PlayerRecord {
-        int pos;
+        short pos;
         std::string name;
-        int pts;
-        int v;
-        int d;
+        short pts;
+        short v;
+        short d;
     };
-    std::map<int, PlayerRecord> playersInMatch;
+    std::map<short, PlayerRecord> playersInMatch;
     std::vector<PlayerRecord> lastRanking;
     bool newRankingAvailable = false;
 
@@ -81,7 +81,7 @@ public:
         savedPass = password;
 
         sf::Packet packet;
-        packet << static_cast<int>(PacketType::LoginRequest) << username << password;
+        packet << static_cast<short>(PacketType::LoginRequest) << username << password;
 
         if (socket.send(packet) == sf::Socket::Status::Done) {
             std::cout << "[CLIENTE] Peticion de Login enviada al servidor." << std::endl;
@@ -107,10 +107,10 @@ public:
         for (auto* peer : p2pPeers) {
             sf::Packet peerPacket;
             while (peer->receive(peerPacket) == sf::Socket::Status::Done) {
-                int typeInt;
+                short typeInt;
                 if (peerPacket >> typeInt) {
-                    if (typeInt == static_cast<int>(PacketType::UpdateBoard)) {
-                        int r, c, playerID, nextPlayerTurn;
+                    if (typeInt == static_cast<short>(PacketType::UpdateBoard)) {
+                        short r, c, playerID, nextPlayerTurn;
                         peerPacket >> r >> c >> playerID >> nextPlayerTurn;
 
                         //LINEA DE DEBUG POR IA PARA DETECTAR ERROR
@@ -126,7 +126,7 @@ public:
         sf::Packet packet;
        
         if (socket.receive(packet) == sf::Socket::Status::Done) {
-            int typeInt;
+            short typeInt;
             packet >> typeInt;
             PacketType type = static_cast<PacketType>(typeInt);
 
@@ -147,11 +147,11 @@ public:
 
             case PacketType::RankingResponse:
                 {
-                int numPlayers;
+                short numPlayers;
                 packet >> numPlayers;
                 lastRanking.clear(); 
 
-                for (int i = 0; i < numPlayers; i++) {
+                for (short i = 0; i < numPlayers; i++) {
                     PlayerRecord rec;
                     packet >> rec.pos >> rec.name >> rec.pts >> rec.v >> rec.d;
                     lastRanking.push_back(rec);
@@ -169,9 +169,9 @@ public:
 
             case PacketType::GameStart:
             {
-                int myID;
+                short myID;
                 unsigned short myPort;
-                int numPeers;
+                short numPeers;
 
                 packet >> myID >> myPort >> numPeers;
 
@@ -192,12 +192,12 @@ public:
                     std::cout << "[P2P] Escuchando en el puerto " << myPort << " a " << incomingConnections << " companeros..." << std::endl;
                 }
 
-                for (int i = 0; i < numPeers; i++) {
-                    int peerID;
+                for (short i = 0; i < numPeers; i++) {
+                    short peerID;
                     std::string peerIP;
                     unsigned short peerPort;
                     std::string peerName;
-                    int peerScore;
+                    short peerScore;
 
                     packet >> peerID >> peerIP >> peerPort >> peerName >> peerScore;
 
@@ -240,7 +240,7 @@ public:
         }
 
         sf::Packet packet;
-        packet << static_cast<int>(PacketType::RegisterRequest) << username << password;
+        packet << static_cast<short>(PacketType::RegisterRequest) << username << password;
 
         if (socket.send(packet) == sf::Socket::Status::Done) {
             std::cout << "[CLIENTE] Peticion de Registro enviada." << std::endl;
@@ -250,14 +250,14 @@ public:
     void RequestRanking() {
         if (!isConnected) return;
         sf::Packet packet;
-        packet << static_cast<int>(PacketType::RankingRequest);
+        packet << static_cast<short>(PacketType::RankingRequest);
         (void)socket.send(packet);
     }
 
     void SendCreateRoom(const std::string& roomName) {
         if (!isConnected) return;
         sf::Packet packet;
-        packet << static_cast<int>(PacketType::CreateRoomRequest) << roomName;
+        packet << static_cast<short>(PacketType::CreateRoomRequest) << roomName;
 
         if (socket.send(packet) == sf::Socket::Status::Done) {
             std::cout << "[CLIENTE] Peticion para CREAR sala '" << roomName << "' enviada." << std::endl;
@@ -267,7 +267,7 @@ public:
     void SendJoinRoom(const std::string& roomName) {
         if (!isConnected) return;
         sf::Packet packet;
-        packet << static_cast<int>(PacketType::JoinRoomRequest) << roomName;
+        packet << static_cast<short>(PacketType::JoinRoomRequest) << roomName;
 
         if (socket.send(packet) == sf::Socket::Status::Done) {
             std::cout << "[CLIENTE] Peticion para UNIRSE a sala '" << roomName << "' enviada." << std::endl;
@@ -275,15 +275,15 @@ public:
     }
 
    
-    void SendGameMove(int row, int col, int ID, int nextTurn) {
+    void SendGameMove(short row, short col, short ID, short nextTurn) {
         if (!isConnected) return;
         std::cout << "[CLIENTE] Pieza clickada en fila " << row << "y columna " << col << std::endl;
 
         // ahora deja espectear y se salta el turno de quien ha ganado
 
         sf::Packet packet;
-        packet << static_cast<int>(PacketType::UpdateBoard) << static_cast<int>(row) << static_cast<int>(col)
-            << static_cast<int>(ID) << static_cast<int>(nextTurn);
+        packet << static_cast<short>(PacketType::UpdateBoard) << static_cast<short>(row) << static_cast<short>(col)
+            << static_cast<short>(ID) << static_cast<short>(nextTurn);
 
         // Enviamos el tablero actualizado a los otros jugadores a la vez
         for (auto* peer : p2pPeers) {
@@ -295,18 +295,18 @@ public:
     }
 
 
-    void SendMatchResult(const std::string& roomName, int first, int second, int third, int fourth) {
+    void SendMatchResult(const std::string& roomName, short first, short second, short third, short fourth) {
         
         socket.disconnect();
         socket.setBlocking(true); 
 
         
-        if (socket.connect(sf::IpAddress::resolve(SERVER_IP).value(), 55000) == sf::Socket::Status::Done) {
+        if (socket.connect(sf::IpAddress::resolve(SERVER_IP).value(), SERVER_PORT) == sf::Socket::Status::Done) {
             isConnected = true;
 
             // enviamos el resultado num�rico // comentarios debug con ia para ayuda
             sf::Packet packet;
-            packet << static_cast<int>(PacketType::ReportResult) << roomName << first << second << third << fourth;
+            packet << static_cast<short>(PacketType::ReportResult) << roomName << first << second << third << fourth;
 
             if (socket.send(packet) == sf::Socket::Status::Done) {
                 std::cout << "[CLIENTE] Resultado enviado (IDs: " << first << ", " << second << ", " << third << ", " << fourth << ")." << std::endl;
@@ -327,13 +327,13 @@ public:
         socket.disconnect();
         socket.setBlocking(true);
 
-        if (socket.connect(sf::IpAddress::resolve(SERVER_IP).value(), 55000) == sf::Socket::Status::Done) {
+        if (socket.connect(sf::IpAddress::resolve(SERVER_IP).value(), SERVER_PORT) == sf::Socket::Status::Done) {
             isConnected = true;
             std::cout << "[CLIENTE] Reconectado al servidor principal. Autenticando..." << std::endl;
 
             // Enviamos el Auto-Login
             sf::Packet packet;
-            packet << static_cast<int>(PacketType::LoginRequest) << savedUser << savedPass;
+            packet << static_cast<short>(PacketType::LoginRequest) << savedUser << savedPass;
             socket.send(packet);
         }
         else {

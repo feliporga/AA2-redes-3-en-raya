@@ -86,7 +86,7 @@ void LoginScene::Update() {
 
             if (user != "" && pass != "") {
                 NM.SendLogin(user, pass);
-                std::cout << "[CLIENTE] Login enviado";
+                std::cout << "[CLIENTE] Login enviado" << std::endl;
             }
             else {
                 std::cout << "[CLIENTE] Por favor, rellena usuario y contrasena." << std::endl;

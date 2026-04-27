@@ -6,10 +6,10 @@
 
 #define Input InputManager::Instance()
 
-int main() {
+short main() {
     Game game;
 
-    srand((unsigned int)time(NULL));
+    srand((unsigned short)time(NULL));
 
     try
     {

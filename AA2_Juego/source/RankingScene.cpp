@@ -94,7 +94,7 @@ void RankingScene::Update() {
 
     if (NM.newRankingAvailable) {
         float startY = 220.0f;
-        int rowCount = 0;
+        short rowCount = 0;
 
         // Lista de jugadores que se muestran
         std::vector<std::string> drawnNames;
@@ -147,5 +147,5 @@ void RankingScene::Render() {
     Scene::Render();
 
     float winW = RM->WINDOW_WIDTH;
-    RM->DrawRect((int)(winW * 0.15f), 190, (int)(winW * 0.80f), 2, 255, 255, 255, 255);
+    RM->DrawRect((short)(winW * 0.15f), 190, (short)(winW * 0.80f), 2, 255, 255, 255, 255);
 }
